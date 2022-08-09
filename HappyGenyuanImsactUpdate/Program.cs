@@ -28,7 +28,7 @@ namespace HappyGenyuanImsactUpdate
             List<FileInfo> zips = new();
             for (int i = 0; i < t; i++)
             {
-                if (t > 0) Console.WriteLine("Now you should paste the path of another zip file.");
+                if (i > 0) Console.WriteLine("Now you should paste the path of another zip file.");
                 zips.Add(GetUpdatePakPath());
             }
 
@@ -148,7 +148,7 @@ namespace HappyGenyuanImsactUpdate
         static DirectoryInfo GetDataPath()
         {
             Console.WriteLine("Paste the full path of game directory here. " +
-                "It should be ended with \"Genyuan Imsact game\".");
+                "It's usually ended with \"Genyuan Imsact game\".");
             string dataPath = Console.ReadLine();
             DirectoryInfo datadir = new(dataPath);
             if (!File.Exists($"{datadir}\\{certaingame1}.exe")
