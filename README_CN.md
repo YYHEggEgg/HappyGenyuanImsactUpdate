@@ -11,7 +11,7 @@ A hdiff-using update program of a certain anime game.
 - 在 [release](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/releases) 下载的本程序最新发行版
 
 您可以参考这里的指示使用程序。     
-首先，您需要将游戏目录（目录下有 Yuanshen.exe 或 GenshinImpact.exe）输入程序，
+首先，您需要将游戏目录（目录下有 Yuanshen.exe 或 GenshinImpact.exe）输入程序，         
 其次，程序会询问您是否要在更新后检查文件正确性。
 - 输入0 - 请勿进行任何检查
 - 输入1 - _（推荐使用）_ 仅检查文件大小是否符合预期（过程一般在 10s 以内，大多数情况下足够）
