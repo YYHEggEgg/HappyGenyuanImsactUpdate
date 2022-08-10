@@ -23,11 +23,21 @@ namespace HappyGenyuanImsactUpdate
 
             var datadir = GetDataPath();
 
+            Console.WriteLine();
+
+            // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
+            int checkAfter = AskForCheck();
+
+            Console.WriteLine();
+
             int t = GetZipCount();
+
+            Console.WriteLine();
 
             List<FileInfo> zips = new();
             for (int i = 0; i < t; i++)
             {
+                Console.WriteLine();
                 if (i > 0) Console.WriteLine("Now you should paste the path of another zip file.");
                 zips.Add(GetUpdatePakPath());
             }
@@ -106,6 +116,18 @@ namespace HappyGenyuanImsactUpdate
 
                 Console.WriteLine();
                 Console.WriteLine();
+
+                if (!UpdateCheck(datadir, checkAfter))
+                {
+                    Console.WriteLine("Sorry, the update process was exited because files aren't correct.");
+                    Console.WriteLine("The program will exit after an enter. ");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+                else Console.WriteLine("Congratulations! Check passed!");
+
+                Console.WriteLine();
+                Console.WriteLine();
                 Console.WriteLine("---------------------------");
                 Console.WriteLine();
                 Console.WriteLine();
@@ -116,6 +138,102 @@ namespace HappyGenyuanImsactUpdate
 
             Console.ReadLine();
         }
+
+        #region Update Verify
+        static bool UpdateCheck(DirectoryInfo datadir, int checkAfter)
+        {
+            Console.WriteLine("Start verifying...");
+
+            bool checkPassed = true;
+
+            if (checkAfter == 0)
+            {
+                Console.WriteLine("Due to user's demanding, no checks are performed.");
+                return true;
+            }
+
+            string pkgversionPath = GetPkgVersion(datadir);
+            if (pkgversionPath == string.Empty)
+            {
+                Console.WriteLine("Can't find version file. No checks are performed.");
+                Console.WriteLine("If you can find it, please tell to us: " +
+                    "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues");
+                return true;
+            }
+
+            using (StreamReader versionreader = new(pkgversionPath))
+            {
+                while (true)
+                {
+                    string? output = versionreader.ReadLine();
+                    if (output == null) break;
+                    else
+                    {
+                        var doce = JsonDocument.Parse(output).RootElement;
+                        /* {
+                         *      "remoteName": "name.pck",
+                         *      "md5": "123456QWERTYUIOPASDFGHJKLZXCVBNM",
+                         *      "fileSize": 1919810
+                         * }
+                         */
+                        string checkName = datadir.FullName + '\\'
+                            + doce.GetProperty("remoteName").GetString();
+                        //command:  -f (original file) (patch file)   (output file)
+                        //  hpatchz -f name.pck        name.pck.hdiff name.pck
+                        var checkFile = new FileInfo(checkName);
+                        string checkPathstd = checkFile.FullName;
+
+                        Console.WriteLine($"Checking: {checkPathstd}");
+
+                        if (!File.Exists(checkPathstd))
+                        {
+                            ReportFileError(checkPathstd, "The file does not exist");
+                            checkPassed = false;
+                            continue;
+                        }
+
+                        RemoveReadOnly(checkFile);
+
+                        #region File Size Check
+                        long sizeExpected = doce.GetProperty("fileSize").GetInt64();
+                        if (checkFile.Length != sizeExpected)
+                        {
+                            ReportFileError(checkPathstd, "The file is not correct");
+                            checkPassed = false;
+                            continue;
+                        }
+                        #endregion
+
+                        if (checkAfter == 2)
+                        {
+                            #region MD5 Check
+                            string md5Expected = doce.GetProperty("md5").GetString();
+                            if (MyMD5.GetMD5HashFromFile(checkPathstd) != md5Expected)
+                            {
+                                ReportFileError(checkPathstd, "The file is not correct");
+                                checkPassed = false;
+                                continue;
+                            }
+                            #endregion
+                        }
+                    }
+                }
+            }
+
+            return checkPassed;
+        }
+
+        private static void RemoveReadOnly(FileInfo checkFile)
+        {
+            if (checkFile.Attributes.HasFlag(FileAttributes.ReadOnly))
+                checkFile.Attributes = FileAttributes.Normal;
+        }
+
+        private static void ReportFileError(string checkPathstd, string reason)
+        {
+            Console.WriteLine($"{reason} : {checkPathstd}");
+        }
+        #endregion
 
         #region Param Getting
         static void CheckForTools()
@@ -159,7 +277,7 @@ namespace HappyGenyuanImsactUpdate
             string dataPath = Console.ReadLine();
             DirectoryInfo datadir = new(dataPath);
             if (!File.Exists($"{datadir}\\{certaingame1}.exe")
-                &&!File.Exists($"{datadir}\\{certaingame2}.exe"))
+                && !File.Exists($"{datadir}\\{certaingame2}.exe"))
             {
                 Console.WriteLine("Invaild game path!");
                 return GetDataPath();
@@ -191,6 +309,48 @@ namespace HappyGenyuanImsactUpdate
                 return GetZipCount();
             }
             else return rtn;
+        }
+
+        // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
+        static int AskForCheck()
+        {
+            Console.WriteLine("Do you want to have a check after updating?");
+            Console.WriteLine("If you don't want any check, type 0;");
+            Console.WriteLine("For a fast check (only compares file size, usually < 10s), type 1;");
+            Console.WriteLine("For a full check (scans files, takes a long time, usually > 5 minutes), type 2.");
+            int rtn = 0;
+            if (!int.TryParse(Console.ReadLine(), out rtn))
+            {
+                Console.WriteLine("Invaild input!");
+                return GetZipCount();
+            }
+            else if (rtn < 0 || rtn > 2)
+            {
+                Console.WriteLine("Invaild input!");
+                return GetZipCount();
+            }
+            else return rtn;
+        }
+
+        /// <summary>
+        /// It has two formats:
+        /// pkg_version
+        /// Audio_[Language]_pkg_version
+        /// </summary>
+        static string GetPkgVersion(DirectoryInfo datadir)
+        {
+            string originVersionPath = $"{datadir.FullName}\\pkg_version";
+            if (File.Exists(originVersionPath)) return originVersionPath;
+            foreach (var file in datadir.GetFiles())
+            {
+                if (file.Name.StartsWith("Audio_") && file.Name.EndsWith("_pkg_version"))
+                {
+                    Console.WriteLine(
+                        $"The lauguage of this audio package is {file.Name.Substring(6, file.Name.Length - 18)}.");
+                    return file.FullName;
+                }
+            }
+            return string.Empty;
         }
         #endregion
     }
