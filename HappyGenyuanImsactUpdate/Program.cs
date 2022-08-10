@@ -46,46 +46,56 @@ namespace HappyGenyuanImsactUpdate
 
                 #region Patch hdiff
                 var hdifftxtPath = $"{datadir}\\hdifffiles.txt";
-                using (StreamReader hdiffreader = new(hdifftxtPath))
+                if (File.Exists(hdifftxtPath))
                 {
-                    while (true)
+                    using (StreamReader hdiffreader = new(hdifftxtPath))
                     {
-                        string? output = hdiffreader.ReadLine();
-                        if (output == null) break;
-                        else
+                        while (true)
                         {
-                            var doc = JsonDocument.Parse(output);
-                            //{"remoteName": "name.pck"}
-                            string hdiffName = datadir.FullName + '\\'
-                                + doc.RootElement.GetProperty("remoteName").GetString();
-                            //command:  -f (original file) (patch file)   (output file)
-                            //  hpatchz -f name.pck        name.pck.hdiff name.pck
-                            string hdiffPathstd = new FileInfo(hdiffName).FullName;
-                            var proc = Process.Start(hpatchzPath,
-                                $"-f \"{hdiffName}\" \"{hdiffName}.hdiff\" \"{hdiffName}\"");
+                            string? output = hdiffreader.ReadLine();
+                            if (output == null) break;
+                            else
+                            {
+                                var doc = JsonDocument.Parse(output);
+                                //{"remoteName": "name.pck"}
+                                string hdiffName = datadir.FullName + '\\'
+                                    + doc.RootElement.GetProperty("remoteName").GetString();
+                                //command:  -f (original file) (patch file)   (output file)
+                                //  hpatchz -f name.pck        name.pck.hdiff name.pck
+                                string hdiffPathstd = new FileInfo(hdiffName).FullName;
+                                var proc = Process.Start(hpatchzPath,
+                                    $"-f \"{hdiffName}\" \"{hdiffName}.hdiff\" \"{hdiffName}\"");
 
-                            hdiffs.Add(hdiffPathstd);
+                                hdiffs.Add(hdiffPathstd);
 
-                            await proc.WaitForExitAsync();
+                                await proc.WaitForExitAsync();
+                            }
                         }
                     }
+
+                    File.Delete(hdifftxtPath);
                 }
                 #endregion
 
                 #region Delete Files
                 var deletetxtPath = $"{datadir}\\deletefiles.txt";
-                using (StreamReader hdiffreader = new(deletetxtPath))
+                if (File.Exists(deletetxtPath))
                 {
-                    while (true)
+                    using (StreamReader hdiffreader = new(deletetxtPath))
                     {
-                        string? output = hdiffreader.ReadLine();
-                        if (output == null) break;
-                        else
+                        while (true)
                         {
-                            string deletedName = datadir.FullName + '\\' + output;
-                            File.Delete(deletedName);
+                            string? output = hdiffreader.ReadLine();
+                            if (output == null) break;
+                            else
+                            {
+                                string deletedName = datadir.FullName + '\\' + output;
+                                File.Delete(deletedName);
+                            }
                         }
                     }
+
+                    File.Delete(deletetxtPath);
                 }
 
                 foreach (var hdiffFile in hdiffs)
@@ -93,9 +103,6 @@ namespace HappyGenyuanImsactUpdate
                     File.Delete($"{hdiffFile}.hdiff");
                 }
                 #endregion
-
-                File.Delete(hdifftxtPath);
-                File.Delete(deletetxtPath);
 
                 Console.WriteLine();
                 Console.WriteLine();
