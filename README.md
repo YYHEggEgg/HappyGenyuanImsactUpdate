@@ -1,4 +1,4 @@
-中文(https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/blob/main/README_CN.md) | EN
+[中文](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/blob/main/README_CN.md) | EN
 
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
