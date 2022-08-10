@@ -11,7 +11,7 @@ You should have the following things:
 - A release of this program
 
 You can use it by the instruction here or in the program.     
-First of all, it will ask for the full path of game directory.
+First of all, it will ask for the full path of game directory.      
 Next, it will ask you to choose how to check the files after update:   
 - 0 - Don't have any check
 - 1 - _(Recommended)_ Only check file size (usually < 10s, very fast, in most cases enough)
