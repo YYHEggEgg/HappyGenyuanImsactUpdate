@@ -3,6 +3,14 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
 
+## New feature
+### v2.0
+Now, if you are using an official version (downloaded by launcher), the program will help you change `config.ini` to make launcher display the correct version.    
+In most cases, the program can automatically judge the version you're updating to, but it needs you to confirm.    
+If it happens, the program will send a message (on Windows 10), so you can still minimum the console, do other things, and you'll receive message if needed.    
+
+In v2.0+, You'll also receive message if update process has been finished, so you can know it at once.
+
 ## Usage
 You should have the following things:
 

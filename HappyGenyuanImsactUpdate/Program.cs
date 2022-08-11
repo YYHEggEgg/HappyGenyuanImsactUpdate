@@ -1,6 +1,7 @@
 ﻿/*******HappyGenyuanImsactUpdate*******/
 // A hdiff-using update program of a certain anime game.
 
+using Microsoft.Toolkit.Uwp.Notifications;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -133,11 +134,149 @@ namespace HappyGenyuanImsactUpdate
                 Console.WriteLine();
             }
 
+            ConfigChange(datadir, zips[0], zips[zips.Count - 1]);
+
+            //Require Windows 10.0.17763.0+
+            if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
+            {
+                // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
+                new ToastContentBuilder()
+                    .AddArgument("action", "viewConversation")
+                    .AddText("Update process is done!")
+                    .AddText("Enjoy the new version!")
+                    .Show();
+            }
+
             Console.WriteLine("Update process is done!");
             Console.WriteLine("Press Enter to continue.");
 
             Console.ReadLine();
         }
+
+        //config.ini contains version info
+        #region Change config for official launcher
+        static void ConfigChange(DirectoryInfo datadir, FileInfo zipstart, FileInfo zipend)
+        {
+            if (!File.Exists($"{datadir}\\config.ini")) return;
+
+            //Require Windows 10.0.17763.0+
+            if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
+            {
+                // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
+                new ToastContentBuilder()
+                    .AddArgument("action", "viewConversation")
+                    .AddText("The update program meets some problem.")
+                    .AddText("Check it out in the console.")
+                    .Show();
+            }
+
+            Console.WriteLine("We have noticed that you're probably using an official launcher.");
+            Console.WriteLine("To make it display the correct version, we would make some change on related file.");
+
+            string verstart = FindStartVersion(zipstart.Name);
+            string verto = FindToVersion(zipend.Name);
+
+            FileInfo configfile = new($"{datadir}\\config.ini");
+
+            if (verstart == string.Empty || verto == string.Empty)
+            {
+                Console.WriteLine("We can't infer the version you're updating to.");
+                CustomChangeVersion(configfile);
+            }
+            else
+            {
+                GetConfigUpdateOptions(configfile, verstart, verto);
+            }
+        }
+
+        static void GetConfigUpdateOptions(FileInfo configfile, string verstart, string verto)
+        {
+            Console.WriteLine($"We infer that you're updating from {verstart} to {verto} .");
+            Console.WriteLine("Is it true? Type 'y' to apply the change " +
+                "or type the correct version you're updating to.");
+            Console.WriteLine("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.");
+            string s = Console.ReadLine();
+            if (s.ToLower() == "y") ApplyConfigChange(configfile, verto);
+            else if (s.ToLower() == "n") return;
+            else if (VerifyVersionString(s)) ApplyConfigChange(configfile, s);
+            else
+            {
+                Console.WriteLine("Invaild version!");
+                CustomChangeVersion(configfile);
+            }
+        }
+
+        static void CustomChangeVersion(FileInfo configfile)
+        {
+            Console.WriteLine("Please type the version you're updating to, and we'll apply the change:");
+            Console.WriteLine("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.");
+
+            string s = Console.ReadLine();
+            if (s.ToLower() == "n") return;
+            else if (VerifyVersionString(s)) ApplyConfigChange(configfile, s);
+            else
+            {
+                Console.WriteLine("Invaild version!");
+                CustomChangeVersion(configfile);
+            }
+        }
+
+        #region Find Version from zip name
+        //      012345678901234567890
+        // zip: game_2.9.0_3.10.0_hdiff_abCdEFgHIjKLMnOP.zip
+        static string FindStartVersion(string zipName)
+        {
+            int index = zipName.IndexOf("_hdiff");
+            if (index == -1) return string.Empty;
+            string substr = zipName.Substring(0, index);
+            int veridx = substr.IndexOf('_');
+            int endidx = substr.IndexOf('_', veridx + 1);
+            if (veridx == -1 || endidx == -1) return string.Empty;
+            string rtn = substr.Substring(veridx + 1, endidx - veridx - 1);
+            return VerifyVersionString(rtn) ? rtn : string.Empty;
+        }
+
+        static string FindToVersion(string zipName)
+        {
+            int index = zipName.IndexOf("_hdiff");
+            string substr = zipName.Substring(0, index);
+            if (index == -1) return string.Empty;
+            int veridx = substr.LastIndexOf('_');
+            if (veridx == -1) return string.Empty;
+            string rtn = substr.Substring(veridx + 1, substr.Length - veridx - 1);
+            return VerifyVersionString(rtn) ? rtn : string.Empty;
+        }
+
+        static bool VerifyVersionString(string verstr)
+        {
+            var strs = verstr.Split('.');
+            foreach (string str in strs)
+            {
+                if (!int.TryParse(str, out _)) return false;
+            }
+            return true;
+        }
+        #endregion
+
+        // i don't want to write a real ini writer lol
+        static void ApplyConfigChange(FileInfo configfile, string version)
+        {
+            string fullfile = string.Empty;
+            using (StreamReader reader = new(configfile.FullName))
+            {
+                while (true)
+                {
+                    string line = reader.ReadLine();
+                    if (line == null) break;
+                    if (line.StartsWith("game_version="))
+                        line = $"game_version={version}";
+                    fullfile += line + "\r\n";
+                }
+            }
+
+            File.WriteAllText(configfile.FullName, fullfile);
+        }
+        #endregion
 
         #region Update Verify
         static bool UpdateCheck(DirectoryInfo datadir, int checkAfter)
@@ -316,18 +455,18 @@ namespace HappyGenyuanImsactUpdate
         {
             Console.WriteLine("Do you want to have a check after updating?");
             Console.WriteLine("If you don't want any check, type 0;");
-            Console.WriteLine("For a fast check (only compares file size, usually < 10s), type 1;");
+            Console.WriteLine("For a fast check (recommended, only compares file size, usually < 10s), type 1;");
             Console.WriteLine("For a full check (scans files, takes a long time, usually > 5 minutes), type 2.");
             int rtn = 0;
             if (!int.TryParse(Console.ReadLine(), out rtn))
             {
                 Console.WriteLine("Invaild input!");
-                return GetZipCount();
+                return AskForCheck();
             }
             else if (rtn < 0 || rtn > 2)
             {
                 Console.WriteLine("Invaild input!");
-                return GetZipCount();
+                return AskForCheck();
             }
             else return rtn;
         }
