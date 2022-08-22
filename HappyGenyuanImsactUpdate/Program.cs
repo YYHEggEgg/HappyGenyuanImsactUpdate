@@ -120,6 +120,17 @@ namespace HappyGenyuanImsactUpdate
 
                 if (!UpdateCheck(datadir, checkAfter))
                 {
+                    //Require Windows 10.0.17763.0+
+                    if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
+                    {
+                        // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
+                        new ToastContentBuilder()
+                            .AddArgument("action", "viewConversation")
+                            .AddText("Update failed.")
+                            .AddText("Sorry, the update process was exited because files aren't correct.")
+                            .Show();
+                    }
+
                     Console.WriteLine("Sorry, the update process was exited because files aren't correct.");
                     Console.WriteLine("The program will exit after an enter. ");
                     Console.ReadLine();
