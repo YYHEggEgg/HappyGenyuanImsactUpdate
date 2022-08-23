@@ -4,22 +4,16 @@
 A hdiff-using update program of a certain anime game.
 
 ## New feature
+### v2.1   
+If you're using an official version, the update package are usually located in the game folder.       
+We have added support in this case. Now, when you're pasting the name of `zip` file, we'll think of it as a **relative path**, which is located in the game data folder.
+
 ### v2.0
 Now, if you are using an official version (downloaded by launcher), the program will help you change `config.ini` to make launcher display the correct version.    
 In most cases, the program can automatically judge the version you're updating to, but it needs you to confirm.    
 If it happens, the program will send a message (on Windows 10), so you can still minimum the console, do other things, and you'll receive message if needed.    
 
 In v2.0+, You'll also receive message if update process has been finished, so you can know it at once.
-
-## If you don't know where the game directory is  
-You can find the launcher path first:  
-
-- Select the launcher link and right click
-- Choose "Open File Location"
-
-Then you got it.
-So the game directory is usually located at "launcher path\ `Genyuan Imsact Game` ".         
-If you have downloaded the pre-download package from official launcher, the two update package will be in it too.
 
 ## Usage
 You should have the following things:
