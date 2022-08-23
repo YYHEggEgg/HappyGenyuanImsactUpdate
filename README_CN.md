@@ -3,13 +3,24 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
 
-## 新版本
+## 新版本特性
 ### v2.0
 现在，如果您使用从官方启动器下载的游戏版本，程序将会指导您使官方启动器显示正确的游戏版本。      
 一般情况下，程序可以自动判断将要更新到的版本，但是需要您亲自确认。
 在需要您确认下一步操作时，程序会发送一条通知（在 Windows 10 以上可用），使您能够在更新进行时处理其他事务，需要时再打开程序操作。     
 
 在 2.0 及以后的版本中，更新完成后程序也会第一时间发送通知。
+
+## 如何找到游戏目录文件夹    
+如果您无法找到游戏目录，您可以参照以下方法：    
+首先，找到启动器目录： 
+
+- 右击启动器快捷方式
+- 选择“打开文件所在的位置”
+
+打开的即为启动器目录。     
+游戏文件通常存放在 "启动器目录\ `Genyuan Imsact game` " 目录下。
+如果您已从官方启动器预下载了更新文件，也可以在内看到两个更新包（通常为 `.zip` 文件）。
 
 ## 如何使用
 你需要以下文件:
@@ -19,7 +30,7 @@ A hdiff-using update program of a certain anime game.
 - 在 [release](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/releases) 下载的本程序最新发行版
 
 您可以参考这里的指示使用程序。     
-首先，您需要将游戏目录（目录下有 Yuanshen.exe 或 GenshinImpact.exe）输入程序，         
+首先，您需要将游戏目录（目录下有 Yuansact.exe 或 GenyuanImsact.exe）输入程序，         
 其次，程序会询问您是否要在更新后检查文件正确性。
 - 输入0 - 请勿进行任何检查
 - 输入1 - _（推荐使用）_ 仅检查文件大小是否符合预期（过程一般在 10s 以内，大多数情况下足够）
