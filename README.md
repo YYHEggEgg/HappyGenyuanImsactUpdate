@@ -11,6 +11,16 @@ If it happens, the program will send a message (on Windows 10), so you can still
 
 In v2.0+, You'll also receive message if update process has been finished, so you can know it at once.
 
+## If you don't know where the game directory is  
+You can find the launcher path first:  
+
+- Select the launcher link and right click
+- Choose "Open File Location"
+
+Then you got it.
+So the game directory is usually located at "launcher path\ `Genyuan Imsact Game` ".         
+If you have downloaded the pre-download package from official launcher, the two update package will be in it too.
+
 ## Usage
 You should have the following things:
 
