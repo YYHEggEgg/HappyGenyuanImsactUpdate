@@ -153,6 +153,7 @@ namespace HappyGenyuanImsactUpdate
             }
 
             ConfigChange(datadir, zips[0], zips[zips.Count - 1]);
+            Console.WriteLine();
 
             //Require Windows 10.0.17763.0+
             if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
