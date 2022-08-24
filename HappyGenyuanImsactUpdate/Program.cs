@@ -165,6 +165,9 @@ namespace HappyGenyuanImsactUpdate
                     .Show();
             }
 
+            DeleteZipFiles(zips);
+            Console.WriteLine();
+
             Console.WriteLine("Update process is done!");
             Console.WriteLine("Press Enter to continue.");
 
@@ -213,8 +216,13 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("Is it true? Type 'y' to apply the change " +
                 "or type the correct version you're updating to.");
             Console.WriteLine("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.");
-            string s = Console.ReadLine();
-            if (s.ToLower() == "y") ApplyConfigChange(configfile, verto);
+            string? s = Console.ReadLine();
+            if (s == null)
+            {
+                Console.WriteLine("Invaild version!");
+                CustomChangeVersion(configfile);
+            }
+            else if (s.ToLower() == "y") ApplyConfigChange(configfile, verto);
             else if (s.ToLower() == "n") return;
             else if (VerifyVersionString(s)) ApplyConfigChange(configfile, s);
             else
@@ -229,8 +237,13 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("Please type the version you're updating to, and we'll apply the change:");
             Console.WriteLine("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.");
 
-            string s = Console.ReadLine();
-            if (s.ToLower() == "n") return;
+            string? s = Console.ReadLine();
+            if (s == null)
+            {
+                Console.WriteLine("Invaild version!");
+                CustomChangeVersion(configfile);
+            }
+            else if (s.ToLower() == "n") return;
             else if (VerifyVersionString(s)) ApplyConfigChange(configfile, s);
             else
             {
@@ -433,7 +446,13 @@ namespace HappyGenyuanImsactUpdate
         {
             Console.WriteLine("Paste the full path of game directory here. " +
                 "It's usually ended with \"Genyuan Imsact game\".");
-            string dataPath = Console.ReadLine();
+            string? dataPath = Console.ReadLine();
+            if (dataPath == null)
+            {
+                Console.WriteLine("Invaild game path!");
+                return GetDataPath();
+            }
+
             DirectoryInfo datadir = new(dataPath);
             if (!File.Exists($"{datadir}\\{certaingame1}.exe")
                 && !File.Exists($"{datadir}\\{certaingame2}.exe"))
@@ -449,7 +468,12 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("Paste the full path of update package here. " +
                 "It should be a zip file.");
             Console.WriteLine("If it's under the game directory, you can just paste the name of zip file here.");
-            string pakPath = Console.ReadLine();
+            string? pakPath = Console.ReadLine();
+            if (pakPath == null)
+            {
+                Console.WriteLine("Invaild update package!");
+                return GetUpdatePakPath(gamePath);
+            }
 
             FileInfo zipfile = new(pakPath);
 
@@ -530,6 +554,38 @@ namespace HappyGenyuanImsactUpdate
                 }
             }
             return rtns;
+        }
+        #endregion
+
+        #region Delete Update Zip File
+        static void DeleteZipFiles(List<FileInfo> zips)
+        {
+            Console.WriteLine("The pre-download packages aren't needed any more.");
+            Console.WriteLine("Do you want to delete them? Type 'y' to accept or 'n' to refuse.");
+            string? s = Console.ReadLine();
+            if (s == null)
+            {
+                Console.WriteLine("Invaild input!");
+                DeleteZipFiles(zips);
+                return;
+            }
+            else if (s.ToLower() == "y")
+            {
+                foreach (var zip in zips)
+                {
+                    zip.Delete();
+                }
+            }
+            else if (s.ToLower() == "n")
+            {
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Invaild input!");
+                DeleteZipFiles(zips);
+                return;
+            }
         }
         #endregion
     }
