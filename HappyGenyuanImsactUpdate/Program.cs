@@ -218,7 +218,7 @@ namespace HappyGenyuanImsactUpdate
                 "or type the correct version you're updating to.");
             Console.WriteLine("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.");
             string? s = Console.ReadLine();
-            if (s == null)
+            if (s == null || s == string.Empty)
             {
                 Console.WriteLine("Invaild version!");
                 CustomChangeVersion(configfile);
@@ -239,7 +239,7 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.");
 
             string? s = Console.ReadLine();
-            if (s == null)
+            if (s == null || s == string.Empty)
             {
                 Console.WriteLine("Invaild version!");
                 CustomChangeVersion(configfile);
@@ -299,7 +299,7 @@ namespace HappyGenyuanImsactUpdate
                 while (true)
                 {
                     string line = reader.ReadLine();
-                    if (line == null) break;
+                    if (line == null || line == string.Empty) break;
                     if (line.StartsWith("game_version="))
                         line = $"game_version={version}";
                     fullfile += line + "\r\n";
@@ -448,7 +448,7 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("Paste the full path of game directory here. " +
                 "It's usually ended with \"Genyuan Imsact game\".");
             string? dataPath = Console.ReadLine();
-            if (dataPath == null)
+            if (dataPath == null || dataPath == string.Empty)
             {
                 Console.WriteLine("Invaild game path!");
                 return GetDataPath();
@@ -470,7 +470,7 @@ namespace HappyGenyuanImsactUpdate
                 "It should be a zip file.");
             Console.WriteLine("If it's under the game directory, you can just paste the name of zip file here.");
             string? pakPath = Console.ReadLine();
-            if (pakPath == null)
+            if (pakPath == null || pakPath == string.Empty)
             {
                 Console.WriteLine("Invaild update package!");
                 return GetUpdatePakPath(gamePath);
