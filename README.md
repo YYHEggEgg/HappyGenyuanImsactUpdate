@@ -4,10 +4,11 @@
 A hdiff-using update program of a certain anime game.
 
 ## New feature
-### v2.1.1   
+### v2.1.2   
 - If you're using an official version, the update package are usually located in the game folder.       
   We have added support in this case. Now, when you're pasting the name of `zip` file, we'll think of it as a **relative path**, which is located in the game data folder.
 - Now, the program will ask you whether to delete the update package. They aren't needed after update.
+- Optimized Update check process - **If the files are not correct before updating, further updates won't be allowed.**   
 
 ### v2.0
 Now, if you are using an official version (downloaded by launcher), the program will help you change `config.ini` to make launcher display the correct version.    
