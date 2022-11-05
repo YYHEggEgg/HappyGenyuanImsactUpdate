@@ -59,6 +59,10 @@ namespace HappyGenyuanImsactUpdate
                 File.Delete(pkgversionpath);
             }
 
+            // Due to some reasons, if the deleted files are not there,
+            // we'll try to delete them afterwards.
+            List<string> delete_delays = new();
+
             foreach (var zipfile in zips)
             {
                 #region Unzip the package
@@ -117,7 +121,9 @@ namespace HappyGenyuanImsactUpdate
                             else
                             {
                                 string deletedName = datadir.FullName + '\\' + output;
-                                File.Delete(deletedName);
+                                if (File.Exists(deletedName))
+                                    File.Delete(deletedName);
+                                else delete_delays.Add(deletedName);
                             }
                         }
                     }
@@ -163,6 +169,10 @@ namespace HappyGenyuanImsactUpdate
 
             ConfigChange(datadir, zips[0], zips[zips.Count - 1]);
             Console.WriteLine();
+
+            // Handling with delayed deletions
+            foreach (var deletedfile in delete_delays)
+                File.Delete(deletedfile);
 
             //Require Windows 10.0.17763.0+
             if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
