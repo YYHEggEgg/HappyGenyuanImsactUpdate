@@ -31,6 +31,15 @@ namespace HappyGenyuanImsactUpdate
 
             Console.WriteLine();
 
+            if (!PkgVersionCheck(datadir, checkAfter))
+            {
+                Console.WriteLine("Sorry, the update process was exited because the original files aren't correct.");
+                Console.WriteLine("The program will exit after an enter. ");
+                Console.ReadLine();
+                Environment.Exit(0);
+            }
+            else Console.WriteLine("Congratulations! Check passed!");
+
             int t = GetZipCount();
 
             Console.WriteLine();
@@ -310,10 +319,11 @@ namespace HappyGenyuanImsactUpdate
         }
         #endregion
 
-        #region Update Verify
+        #region Package Verify
         static bool UpdateCheck(DirectoryInfo datadir, int checkAfter)
         {
             Console.WriteLine("Start verifying...");
+            Console.WriteLine();
 
             bool checkPassed = true;
 
@@ -355,7 +365,10 @@ namespace HappyGenyuanImsactUpdate
                             var checkFile = new FileInfo(checkName);
                             string checkPathstd = checkFile.FullName;
 
+
                             Console.WriteLine($"Checking: {checkPathstd}");
+                            // Clear the content in Console
+                            ClearWrittenLine($"Checking: {checkPathstd}");
 
                             if (!File.Exists(checkPathstd))
                             {
@@ -405,6 +418,49 @@ namespace HappyGenyuanImsactUpdate
         private static void ReportFileError(string checkPathstd, string reason)
         {
             Console.WriteLine($"{reason} : {checkPathstd}");
+        }
+
+        #region Clear the Written Content in Console
+        // Reference:
+        // [ Can Console.Clear be used to only clear a line instead of whole console? ]
+        // https://stackoverflow.com/questions/8946808/can-console-clear-be-used-to-only-clear-a-line-instead-of-whole-console
+        
+        private static void ClearSingleLine()
+        {
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            int currentLineCursor = Console.CursorTop;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, currentLineCursor);
+        }
+
+        private static void ClearWrittenLine(string wstr)
+        {
+            int times = (int)Math.Ceiling((decimal)wstr.Length / Console.WindowWidth);
+            while (times-- > 0) ClearSingleLine();
+        }
+        #endregion
+
+        // Check if pkg_version and Audio_pkg_version can match the real condition
+        static bool PkgVersionCheck(DirectoryInfo datadir, int checkAfter)
+        {
+            var pkgversionPaths = GetPkgVersion(datadir);
+            if (!pkgversionPaths.Contains("pkg_version")) return false;
+
+            // ...\??? game\???_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows
+            string audio1 = $@"{datadir.FullName}\{certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string audio2 = $@"{datadir.FullName}\{certaingame2}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string[]? audio_pkgversions = null;
+            if (Directory.Exists(audio1)) audio_pkgversions = Directory.GetDirectories(audio1);
+            else if (Directory.Exists(audio2)) audio_pkgversions = Directory.GetDirectories(audio2);
+            else return false;
+
+            foreach (string audioname in audio_pkgversions)
+            {
+                if (!pkgversionPaths.Contains($"Audio_{audioname}_pkg_version")) return false;
+            }
+
+            return UpdateCheck(datadir, checkAfter);
         }
         #endregion
 
