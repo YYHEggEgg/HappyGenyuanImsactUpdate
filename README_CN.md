@@ -4,6 +4,11 @@
 A hdiff-using update program of a certain anime game.
 
 ## 新版本特性
+### v2.2.1
+- 现支持有子文件夹的压缩包。
+- 修复了文件删除过程中的问题。
+- 现在，更新检查只有在全部更新包 patch 完后才会进行。
+
 ### v2.1.2
 - 如果您使用官方版本，通常升级包就在游戏目录下。       
   我们对这种情况添加了支持，现在您将 `zip` 文件名粘贴至控制台时，我们会默认其为一个**相对路径**，并认为它所在的目录为游戏目录。
@@ -18,14 +23,14 @@ A hdiff-using update program of a certain anime game.
 在 2.0 及以后的版本中，更新完成后程序也会第一时间发送通知。
 
 ## 如何找到游戏目录文件夹    
-如果您无法找到游戏目录，您可以参照以下方法：    
-首先，找到启动器目录： 
+1. 打开启动器   
+2. 点击“启动”旁的菜单    
+![Launcher UI](https://raw.githubusercontent.com/YYHEggEgg/HappyGenyuanImsactUpdate/main/Tutorial%20Images/rel_v2.1.2%2B/img01.jpg)    
 
-- 右击启动器快捷方式
-- 选择“打开文件所在的位置”
+3. 点击“安装位置”选项
+4. 找到启动器显示的文件夹 (**注意：图片仅供参考，目录在您自己的电脑上与图片中不同！**)
+![Installation Location](https://raw.githubusercontent.com/YYHEggEgg/HappyGenyuanImsactUpdate/main/Tutorial%20Images/rel_v2.1.2%2B/img02.jpg)  
 
-打开的即为启动器目录。     
-游戏文件通常存放在 "启动器目录\ `Genyuan Imsact game` " 目录下。
 如果您已从官方启动器预下载了更新文件，也可以在内看到两个更新包（通常为 `.zip` 文件）。
 
 ## 如何使用

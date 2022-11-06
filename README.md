@@ -3,7 +3,15 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
 
+## For potential contributers
+A code reconstruction is on the way, please have a rest and contribute later!
+
 ## New feature
+### v2.2.1
+- Supported packages with sub folders  
+- Bugfix about file deletion
+- Delayed the update check to the end
+
 ### v2.1.2   
 - If you're using an official version, the update package are usually located in the game folder.       
   We have added support in this case. Now, when you're pasting the name of `zip` file, we'll think of it as a **relative path**, which is located in the game data folder.

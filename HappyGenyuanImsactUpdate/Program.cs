@@ -59,14 +59,24 @@ namespace HappyGenyuanImsactUpdate
                 File.Delete(pkgversionpath);
             }
 
+            // Due to some reasons, if the deleted files are not there,
+            // we'll try to delete them afterwards.
+            List<string> delete_delays = new();
+
             foreach (var zipfile in zips)
             {
                 #region Unzip the package
+                // NOTE: Because some dawn packages from gdrive has a sub folder, we should move it back.
+                // Record the directories now
+                var predirs = Directory.GetDirectories(datadir.FullName);
+
                 Console.WriteLine("Unzip the package...");
 
                 var pro = Process.Start(path7z, $"x \"{zipfile.FullName}\" -o\"{datadir.FullName}\" -aoa -bsp1");
 
                 await pro.WaitForExitAsync();
+
+                MoveBackSubFolder(datadir, predirs);
                 #endregion
 
                 List<string> hdiffs = new();//For deleteing
@@ -117,7 +127,9 @@ namespace HappyGenyuanImsactUpdate
                             else
                             {
                                 string deletedName = datadir.FullName + '\\' + output;
-                                File.Delete(deletedName);
+                                if (File.Exists(deletedName))
+                                    File.Delete(deletedName);
+                                else delete_delays.Add(deletedName);
                             }
                         }
                     }
@@ -134,35 +146,44 @@ namespace HappyGenyuanImsactUpdate
                 Console.WriteLine();
                 Console.WriteLine();
 
-                if (!UpdateCheck(datadir, checkAfter))
-                {
-                    //Require Windows 10.0.17763.0+
-                    if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
-                    {
-                        // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
-                        new ToastContentBuilder()
-                            .AddArgument("action", "viewConversation")
-                            .AddText("Update failed.")
-                            .AddText("Sorry, the update process was exited because files aren't correct.")
-                            .Show();
-                    }
-
-                    Console.WriteLine("Sorry, the update process was exited because files aren't correct.");
-                    Console.WriteLine("The program will exit after an enter. ");
-                    Console.ReadLine();
-                    Environment.Exit(0);
-                }
-                else Console.WriteLine("Congratulations! Check passed!");
-
-                Console.WriteLine();
-                Console.WriteLine();
-                Console.WriteLine("---------------------------");
-                Console.WriteLine();
-                Console.WriteLine();
             }
 
+            // For some reasons, the package check is delayed to the end.
+            // It is a proper change because only the newest pkg_version is valid.
+            if (!UpdateCheck(datadir, checkAfter))
+            {
+                //Require Windows 10.0.17763.0+
+                if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
+                {
+                    // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
+                    new ToastContentBuilder()
+                        .AddArgument("action", "viewConversation")
+                        .AddText("Update failed.")
+                        .AddText("Sorry, the update process was exited because files aren't correct.")
+                        .Show();
+                }
+
+                Console.WriteLine("Sorry, the update process was exited because files aren't correct.");
+                Console.WriteLine("The program will exit after an enter. ");
+                Console.ReadLine();
+                Environment.Exit(0);
+            }
+            else Console.WriteLine("Congratulations! Check passed!");
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("---------------------------");
+            Console.WriteLine();
+            Console.WriteLine();
+
+            // Change the config.ini of official launcher
             ConfigChange(datadir, zips[0], zips[zips.Count - 1]);
             Console.WriteLine();
+
+            // Handling with delayed deletions
+            foreach (var deletedfile in delete_delays)
+                if (File.Exists(deletedfile))
+                    File.Delete(deletedfile);
 
             //Require Windows 10.0.17763.0+
             if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
@@ -445,7 +466,7 @@ namespace HappyGenyuanImsactUpdate
         static bool PkgVersionCheck(DirectoryInfo datadir, int checkAfter)
         {
             var pkgversionPaths = GetPkgVersion(datadir);
-            if (!pkgversionPaths.Contains("pkg_version")) return false;
+            if (!pkgversionPaths.Contains($"{datadir}\\pkg_version")) return false;
 
             // ...\??? game\???_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows
             string audio1 = $@"{datadir.FullName}\{certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
@@ -453,7 +474,7 @@ namespace HappyGenyuanImsactUpdate
             string[]? audio_pkgversions = null;
             if (Directory.Exists(audio1)) audio_pkgversions = Directory.GetDirectories(audio1);
             else if (Directory.Exists(audio2)) audio_pkgversions = Directory.GetDirectories(audio2);
-            else return false;
+            else return UpdateCheck(datadir, checkAfter);
 
             foreach (string audioname in audio_pkgversions)
             {
@@ -643,6 +664,44 @@ namespace HappyGenyuanImsactUpdate
                 DeleteZipFiles(zips);
                 return;
             }
+        }
+        #endregion
+
+        #region Move Back Sub Folder from zip file
+        // NOTE: Because some dawn packages from gdrive has a sub folder, we should move it back.
+        private static void MoveBackSubFolder(DirectoryInfo datadir, string[]? predirs)
+        {
+            var nowdirs = Directory.GetDirectories(datadir.FullName);
+            var newappeared_dirs = GetNewlyAppearedFolders(predirs, nowdirs);
+            foreach (var dir in newappeared_dirs)
+            {
+                MoveDir(dir, datadir.FullName);
+            }
+        }
+
+        private static List<string> GetNewlyAppearedFolders(string[]? predirs, string[]? nowdirs)
+        {
+            List<string> newdirs = new();
+            foreach (var dir in nowdirs)
+            {
+                if (!predirs.Contains(dir)) newdirs.Add(dir);
+            }
+            return newdirs;
+        }
+
+        private static void MoveDir(string source, string target)
+        {
+            foreach (var file in Directory.GetFiles(source))
+            {
+                File.Move(file, $"{target}\\{new FileInfo(file).Name}", true);
+            }
+            foreach (var dir in Directory.GetDirectories(source))
+            {
+                string newdir = $"{target}\\{new DirectoryInfo(dir).Name}";
+                Directory.CreateDirectory(newdir);
+                MoveDir(dir, newdir);
+            }
+            Directory.Delete(source);
         }
         #endregion
     }
