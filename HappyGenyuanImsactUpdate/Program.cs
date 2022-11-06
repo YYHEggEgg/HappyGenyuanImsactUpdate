@@ -182,7 +182,8 @@ namespace HappyGenyuanImsactUpdate
 
             // Handling with delayed deletions
             foreach (var deletedfile in delete_delays)
-                File.Delete(deletedfile);
+                if (File.Exists(deletedfile))
+                    File.Delete(deletedfile);
 
             //Require Windows 10.0.17763.0+
             if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
