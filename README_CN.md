@@ -4,6 +4,10 @@
 A hdiff-using update program of a certain anime game.
 
 ## 新版本特性
+### v2.3.0
+- 一直咕的代码重构做完了！
+- 修复了特定非法输入导致程序崩溃的问题
+
 ### v2.2.1
 - 现支持有子文件夹的压缩包。
 - 修复了文件删除过程中的问题。
