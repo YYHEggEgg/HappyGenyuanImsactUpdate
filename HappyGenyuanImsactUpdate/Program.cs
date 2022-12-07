@@ -476,9 +476,10 @@ namespace HappyGenyuanImsactUpdate
             else if (Directory.Exists(audio2)) audio_pkgversions = Directory.GetDirectories(audio2);
             else return UpdateCheck(datadir, checkAfter);
 
-            foreach (string audioname in audio_pkgversions)
+            foreach (string audiopath in audio_pkgversions)
             {
-                if (!pkgversionPaths.Contains($"Audio_{audioname}_pkg_version")) return false;
+                string audioname = new DirectoryInfo(audiopath).Name;
+                if (!pkgversionPaths.Contains($"{datadir}\\Audio_{audioname}_pkg_version")) return false;
             }
 
             return UpdateCheck(datadir, checkAfter);
