@@ -26,6 +26,7 @@ namespace HappyGenyuanImsactUpdate
 
             Console.WriteLine();
 
+            Patch patch = new Patch(datadir, path7z, hpatchzPath);
             // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
             CheckMode checkAfter = (CheckMode) AskForCheck();
 
@@ -71,77 +72,14 @@ namespace HappyGenyuanImsactUpdate
                 var predirs = Directory.GetDirectories(datadir.FullName);
 
                 Console.WriteLine("Unzip the package...");
-
                 var pro = Process.Start(path7z, $"x \"{zipfile.FullName}\" -o\"{datadir.FullName}\" -aoa -bsp1");
-
                 await pro.WaitForExitAsync();
 
                 Unzipped.MoveBackSubFolder(datadir, predirs);
                 #endregion
 
-                List<string> hdiffs = new();//For deleteing
-
-                #region Patch hdiff
-                var hdifftxtPath = $"{datadir}\\hdifffiles.txt";
-                if (File.Exists(hdifftxtPath))
-                {
-                    using (StreamReader hdiffreader = new(hdifftxtPath))
-                    {
-                        while (true)
-                        {
-                            string? output = hdiffreader.ReadLine();
-                            if (output == null) break;
-                            else
-                            {
-                                var doc = JsonDocument.Parse(output);
-                                //{"remoteName": "name.pck"}
-                                string hdiffName = datadir.FullName + '\\'
-                                    + doc.RootElement.GetProperty("remoteName").GetString();
-                                //command:  -f (original file) (patch file)   (output file)
-                                //  hpatchz -f name.pck        name.pck.hdiff name.pck
-                                string hdiffPathstd = new FileInfo(hdiffName).FullName;
-                                var proc = Process.Start(hpatchzPath,
-                                    $"-f \"{hdiffName}\" \"{hdiffName}.hdiff\" \"{hdiffName}\"");
-
-                                hdiffs.Add(hdiffPathstd);
-
-                                await proc.WaitForExitAsync();
-                            }
-                        }
-                    }
-
-                    File.Delete(hdifftxtPath);
-                }
-                #endregion
-
-                #region Delete Files
-                var deletetxtPath = $"{datadir}\\deletefiles.txt";
-                if (File.Exists(deletetxtPath))
-                {
-                    using (StreamReader hdiffreader = new(deletetxtPath))
-                    {
-                        while (true)
-                        {
-                            string? output = hdiffreader.ReadLine();
-                            if (output == null) break;
-                            else
-                            {
-                                string deletedName = datadir.FullName + '\\' + output;
-                                if (File.Exists(deletedName))
-                                    File.Delete(deletedName);
-                                else delete_delays.Add(deletedName);
-                            }
-                        }
-                    }
-
-                    File.Delete(deletetxtPath);
-                }
-
-                foreach (var hdiffFile in hdiffs)
-                {
-                    File.Delete($"{hdiffFile}.hdiff");
-                }
-                #endregion
+                await patch.Hdiff();//For deleteing
+                delete_delays.AddRange(patch.DeleteFiles());
 
                 Console.WriteLine();
                 Console.WriteLine();
