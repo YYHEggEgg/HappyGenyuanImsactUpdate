@@ -27,7 +27,7 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine();
 
             // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
-            int checkAfter = AskForCheck();
+            CheckMode checkAfter = (CheckMode) AskForCheck();
 
             Console.WriteLine();
 
@@ -53,7 +53,7 @@ namespace HappyGenyuanImsactUpdate
             }
 
             //Delete the original pkg_version file
-            var pkgversionpaths = GetPkgVersion(datadir);
+            var pkgversionpaths = UpCheck.GetPkgVersion(datadir);
             foreach (var pkgversionpath in pkgversionpaths)
             {
                 File.Delete(pkgversionpath);
@@ -76,7 +76,7 @@ namespace HappyGenyuanImsactUpdate
 
                 await pro.WaitForExitAsync();
 
-                MoveBackSubFolder(datadir, predirs);
+                Unzipped.MoveBackSubFolder(datadir, predirs);
                 #endregion
 
                 List<string> hdiffs = new();//For deleteing
@@ -145,7 +145,6 @@ namespace HappyGenyuanImsactUpdate
 
                 Console.WriteLine();
                 Console.WriteLine();
-
             }
 
             // For some reasons, the package check is delayed to the end.
@@ -205,9 +204,14 @@ namespace HappyGenyuanImsactUpdate
             Console.ReadLine();
         }
 
-        //config.ini contains version info
         #region Change config for official launcher
-        static void ConfigChange(DirectoryInfo datadir, FileInfo zipstart, FileInfo zipend)
+        /// <summary>
+        /// Change config for official launcher
+        /// </summary>
+        /// <param name="datadir">Game Data dir</param>
+        /// <param name="zipstart">Used for infering the update version</param>
+        /// <param name="zipend">Used for infering the update version</param>
+        public static void ConfigChange(DirectoryInfo datadir, FileInfo zipstart, FileInfo zipend)
         {
             if (!File.Exists($"{datadir}\\config.ini")) return;
 
@@ -225,8 +229,8 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("We have noticed that you're probably using an official launcher.");
             Console.WriteLine("To make it display the correct version, we would make some change on related file.");
 
-            string verstart = FindStartVersion(zipstart.Name);
-            string verto = FindToVersion(zipend.Name);
+            string verstart = ConfigIni.FindStartVersion(zipstart.Name);
+            string verto = ConfigIni.FindToVersion(zipend.Name);
 
             FileInfo configfile = new($"{datadir}\\config.ini");
 
@@ -241,7 +245,13 @@ namespace HappyGenyuanImsactUpdate
             }
         }
 
-        static void GetConfigUpdateOptions(FileInfo configfile, string verstart, string verto)
+        /// <summary>
+        /// Ask user for applying the inferred update options
+        /// </summary>
+        /// <param name="configfile">config.ini</param>
+        /// <param name="verstart">the update version</param>
+        /// <param name="verto">the update version</param>
+        public static void GetConfigUpdateOptions(FileInfo configfile, string verstart, string verto)
         {
             Console.WriteLine($"We infer that you're updating from {verstart} to {verto} .");
             Console.WriteLine("Is it true? Type 'y' to apply the change " +
@@ -253,9 +263,11 @@ namespace HappyGenyuanImsactUpdate
                 Console.WriteLine("Invaild version!");
                 CustomChangeVersion(configfile);
             }
-            else if (s.ToLower() == "y") ApplyConfigChange(configfile, verto);
+            else if (s.ToLower() == "y") 
+                ConfigIni.ApplyConfigChange(configfile, verto);
             else if (s.ToLower() == "n") return;
-            else if (VerifyVersionString(s)) ApplyConfigChange(configfile, s);
+            else if (ConfigIni.VerifyVersionString(s)) 
+                ConfigIni.ApplyConfigChange(configfile, s);
             else
             {
                 Console.WriteLine("Invaild version!");
@@ -263,7 +275,11 @@ namespace HappyGenyuanImsactUpdate
             }
         }
 
-        static void CustomChangeVersion(FileInfo configfile)
+        /// <summary>
+        /// Type a custom version for update
+        /// </summary>
+        /// <param name="configfile">config.ini</param>
+        public static void CustomChangeVersion(FileInfo configfile)
         {
             Console.WriteLine("Please type the version you're updating to, and we'll apply the change:");
             Console.WriteLine("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.");
@@ -275,170 +291,44 @@ namespace HappyGenyuanImsactUpdate
                 CustomChangeVersion(configfile);
             }
             else if (s.ToLower() == "n") return;
-            else if (VerifyVersionString(s)) ApplyConfigChange(configfile, s);
+            else if (ConfigIni.VerifyVersionString(s)) 
+                ConfigIni.ApplyConfigChange(configfile, s);
             else
             {
                 Console.WriteLine("Invaild version!");
                 CustomChangeVersion(configfile);
             }
         }
-
-        #region Find Version from zip name
-        //      012345678901234567890
-        // zip: game_2.9.0_3.10.0_hdiff_abCdEFgHIjKLMnOP.zip
-        static string FindStartVersion(string zipName)
-        {
-            int index = zipName.IndexOf("_hdiff");
-            if (index == -1) return string.Empty;
-            string substr = zipName.Substring(0, index);
-            int veridx = substr.IndexOf('_');
-            int endidx = substr.IndexOf('_', veridx + 1);
-            if (veridx == -1 || endidx == -1) return string.Empty;
-            string rtn = substr.Substring(veridx + 1, endidx - veridx - 1);
-            return VerifyVersionString(rtn) ? rtn : string.Empty;
-        }
-
-        static string FindToVersion(string zipName)
-        {
-            int index = zipName.IndexOf("_hdiff");
-            string substr = zipName.Substring(0, index);
-            if (index == -1) return string.Empty;
-            int veridx = substr.LastIndexOf('_');
-            if (veridx == -1) return string.Empty;
-            string rtn = substr.Substring(veridx + 1, substr.Length - veridx - 1);
-            return VerifyVersionString(rtn) ? rtn : string.Empty;
-        }
-
-        static bool VerifyVersionString(string verstr)
-        {
-            var strs = verstr.Split('.');
-            foreach (string str in strs)
-            {
-                if (!int.TryParse(str, out _)) return false;
-            }
-            return true;
-        }
-        #endregion
-
-        // i don't want to write a real ini writer lol
-        static void ApplyConfigChange(FileInfo configfile, string version)
-        {
-            string fullfile = string.Empty;
-            using (StreamReader reader = new(configfile.FullName))
-            {
-                while (true)
-                {
-                    string line = reader.ReadLine();
-                    if (line == null || line == string.Empty) break;
-                    if (line.StartsWith("game_version="))
-                        line = $"game_version={version}";
-                    fullfile += line + "\r\n";
-                }
-            }
-
-            File.WriteAllText(configfile.FullName, fullfile);
-        }
         #endregion
 
         #region Package Verify
-        static bool UpdateCheck(DirectoryInfo datadir, int checkAfter)
+        static bool UpdateCheck(DirectoryInfo datadir, CheckMode checkAfter)
         {
             Console.WriteLine("Start verifying...");
             Console.WriteLine();
 
-            bool checkPassed = true;
-
-            if (checkAfter == 0)
+            if (checkAfter == CheckMode.None)
             {
                 Console.WriteLine("Due to user's demanding, no checks are performed.");
                 return true;
             }
 
-            var pkgversionPaths = GetPkgVersion(datadir);
-            if (pkgversionPaths.Count == 0)
+            var pkgversionPaths = UpCheck.GetPkgVersion(datadir);
+            if (pkgversionPaths == null || pkgversionPaths.Count == 0)
             {
                 Console.WriteLine("Can't find version file. No checks are performed.");
                 Console.WriteLine("If you can find it, please tell to us: " +
                     "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues");
                 return true;
             }
-            foreach (var pkgversionPath in pkgversionPaths)
-            {
-                using (StreamReader versionreader = new(pkgversionPath))
+
+            return UpCheck.CheckByPkgVersion(datadir, pkgversionPaths, checkAfter, 
+                str =>
                 {
-                    while (true)
-                    {
-                        string? output = versionreader.ReadLine();
-                        if (output == null) break;
-                        else
-                        {
-                            var doce = JsonDocument.Parse(output).RootElement;
-                            /* {
-                             *      "remoteName": "name.pck",
-                             *      "md5": "123456QWERTYUIOPASDFGHJKLZXCVBNM",
-                             *      "fileSize": 1919810
-                             * }
-                             */
-                            string checkName = datadir.FullName + '\\'
-                                + doce.GetProperty("remoteName").GetString();
-                            //command:  -f (original file) (patch file)   (output file)
-                            //  hpatchz -f name.pck        name.pck.hdiff name.pck
-                            var checkFile = new FileInfo(checkName);
-                            string checkPathstd = checkFile.FullName;
-
-
-                            Console.WriteLine($"Checking: {checkPathstd}");
-                            // Clear the content in Console
-                            ClearWrittenLine($"Checking: {checkPathstd}");
-
-                            if (!File.Exists(checkPathstd))
-                            {
-                                ReportFileError(checkPathstd, "The file does not exist");
-                                checkPassed = false;
-                                continue;
-                            }
-
-                            RemoveReadOnly(checkFile);
-
-                            #region File Size Check
-                            long sizeExpected = doce.GetProperty("fileSize").GetInt64();
-                            if (checkFile.Length != sizeExpected)
-                            {
-                                ReportFileError(checkPathstd, "The file is not correct");
-                                checkPassed = false;
-                                continue;
-                            }
-                            #endregion
-
-                            if (checkAfter == 2)
-                            {
-                                #region MD5 Check
-                                string md5Expected = doce.GetProperty("md5").GetString();
-                                if (MyMD5.GetMD5HashFromFile(checkPathstd) != md5Expected)
-                                {
-                                    ReportFileError(checkPathstd, "The file is not correct");
-                                    checkPassed = false;
-                                    continue;
-                                }
-                                #endregion
-                            }
-                        }
-                    }
-                }
-            }
-
-            return checkPassed;
-        }
-
-        private static void RemoveReadOnly(FileInfo checkFile)
-        {
-            if (checkFile.Attributes.HasFlag(FileAttributes.ReadOnly))
-                checkFile.Attributes = FileAttributes.Normal;
-        }
-
-        private static void ReportFileError(string checkPathstd, string reason)
-        {
-            Console.WriteLine($"{reason} : {checkPathstd}");
+                    Console.WriteLine(str);
+                    // Clear the content in Console
+                    ClearWrittenLine(str);
+                });
         }
 
         #region Clear the Written Content in Console
@@ -463,9 +353,9 @@ namespace HappyGenyuanImsactUpdate
         #endregion
 
         // Check if pkg_version and Audio_pkg_version can match the real condition
-        static bool PkgVersionCheck(DirectoryInfo datadir, int checkAfter)
+        static bool PkgVersionCheck(DirectoryInfo datadir, CheckMode checkAfter)
         {
-            var pkgversionPaths = GetPkgVersion(datadir);
+            var pkgversionPaths = UpCheck.GetPkgVersion(datadir);
             if (!pkgversionPaths.Contains($"{datadir}\\pkg_version")) return false;
 
             // ...\??? game\???_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows
@@ -611,29 +501,6 @@ namespace HappyGenyuanImsactUpdate
             }
             else return rtn;
         }
-
-        /// <summary>
-        /// It has two formats:
-        /// pkg_version
-        /// Audio_[Language]_pkg_version
-        /// </summary>
-        static List<string> GetPkgVersion(DirectoryInfo datadir)
-        {
-            List<string> rtns = new();
-
-            string originVersionPath = $"{datadir.FullName}\\pkg_version";
-            if (File.Exists(originVersionPath)) rtns.Add(originVersionPath);
-            foreach (var file in datadir.GetFiles())
-            {
-                if (file.Name.StartsWith("Audio_") && file.Name.EndsWith("_pkg_version"))
-                {
-                    Console.WriteLine(
-                        $"The lauguage of this audio package is {file.Name.Substring(6, file.Name.Length - 18)}.");
-                    rtns.Add(file.FullName);
-                }
-            }
-            return rtns;
-        }
         #endregion
 
         #region Delete Update Zip File
@@ -665,44 +532,6 @@ namespace HappyGenyuanImsactUpdate
                 DeleteZipFiles(zips);
                 return;
             }
-        }
-        #endregion
-
-        #region Move Back Sub Folder from zip file
-        // NOTE: Because some dawn packages from gdrive has a sub folder, we should move it back.
-        private static void MoveBackSubFolder(DirectoryInfo datadir, string[]? predirs)
-        {
-            var nowdirs = Directory.GetDirectories(datadir.FullName);
-            var newappeared_dirs = GetNewlyAppearedFolders(predirs, nowdirs);
-            foreach (var dir in newappeared_dirs)
-            {
-                MoveDir(dir, datadir.FullName);
-            }
-        }
-
-        private static List<string> GetNewlyAppearedFolders(string[]? predirs, string[]? nowdirs)
-        {
-            List<string> newdirs = new();
-            foreach (var dir in nowdirs)
-            {
-                if (!predirs.Contains(dir)) newdirs.Add(dir);
-            }
-            return newdirs;
-        }
-
-        private static void MoveDir(string source, string target)
-        {
-            foreach (var file in Directory.GetFiles(source))
-            {
-                File.Move(file, $"{target}\\{new FileInfo(file).Name}", true);
-            }
-            foreach (var dir in Directory.GetDirectories(source))
-            {
-                string newdir = $"{target}\\{new DirectoryInfo(dir).Name}";
-                Directory.CreateDirectory(newdir);
-                MoveDir(dir, newdir);
-            }
-            Directory.Delete(source);
         }
         #endregion
     }
