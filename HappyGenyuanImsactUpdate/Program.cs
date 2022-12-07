@@ -3,7 +3,6 @@
 
 using Microsoft.Toolkit.Uwp.Notifications;
 using System.Diagnostics;
-using System.Text.Json;
 
 namespace HappyGenyuanImsactUpdate
 {
@@ -28,7 +27,7 @@ namespace HappyGenyuanImsactUpdate
 
             Patch patch = new Patch(datadir, path7z, hpatchzPath);
             // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
-            CheckMode checkAfter = (CheckMode) AskForCheck();
+            CheckMode checkAfter = (CheckMode)AskForCheck();
 
             Console.WriteLine();
 
@@ -78,7 +77,7 @@ namespace HappyGenyuanImsactUpdate
                 Unzipped.MoveBackSubFolder(datadir, predirs);
                 #endregion
 
-                await patch.Hdiff();//For deleteing
+                await patch.Hdiff();
                 delete_delays.AddRange(patch.DeleteFiles());
 
                 Console.WriteLine();
@@ -201,10 +200,10 @@ namespace HappyGenyuanImsactUpdate
                 Console.WriteLine("Invaild version!");
                 CustomChangeVersion(configfile);
             }
-            else if (s.ToLower() == "y") 
+            else if (s.ToLower() == "y")
                 ConfigIni.ApplyConfigChange(configfile, verto);
             else if (s.ToLower() == "n") return;
-            else if (ConfigIni.VerifyVersionString(s)) 
+            else if (ConfigIni.VerifyVersionString(s))
                 ConfigIni.ApplyConfigChange(configfile, s);
             else
             {
@@ -229,7 +228,7 @@ namespace HappyGenyuanImsactUpdate
                 CustomChangeVersion(configfile);
             }
             else if (s.ToLower() == "n") return;
-            else if (ConfigIni.VerifyVersionString(s)) 
+            else if (ConfigIni.VerifyVersionString(s))
                 ConfigIni.ApplyConfigChange(configfile, s);
             else
             {
@@ -260,7 +259,7 @@ namespace HappyGenyuanImsactUpdate
                 return true;
             }
 
-            return UpCheck.CheckByPkgVersion(datadir, pkgversionPaths, checkAfter, 
+            return UpCheck.CheckByPkgVersion(datadir, pkgversionPaths, checkAfter,
                 str =>
                 {
                     Console.WriteLine(str);
@@ -273,7 +272,7 @@ namespace HappyGenyuanImsactUpdate
         // Reference:
         // [ Can Console.Clear be used to only clear a line instead of whole console? ]
         // https://stackoverflow.com/questions/8946808/can-console-clear-be-used-to-only-clear-a-line-instead-of-whole-console
-        
+
         private static void ClearSingleLine()
         {
             Console.SetCursorPosition(0, Console.CursorTop - 1);
@@ -384,12 +383,14 @@ namespace HappyGenyuanImsactUpdate
 
             FileInfo zipfile = new(pakPath);
 
-            if (pakPath.Substring(1, 2) != ":\\")
-            {
-                //Support relative path
-                pakPath = $"{gamePath}\\{pakPath}";
-                zipfile = new(pakPath);
-            }
+            // Fuck why I have tested this
+            if (pakPath.Length >= 3)
+                if (pakPath.Substring(1, 2) != ":\\")
+                {
+                    //Support relative path
+                    pakPath = $"{gamePath}\\{pakPath}";
+                    zipfile = new(pakPath);
+                }
 
             //To protect fools who really just paste its name
             if (zipfile.Extension != ".zip")
