@@ -3,10 +3,11 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
 
-## For potential contributers
-A code reconstruction is on the way, please have a rest and contribute later!
-
 ## New feature
+### v2.3.0
+- Code reconstruction
+- Bugfix about invaild input
+
 ### v2.2.1
 - Supported packages with sub folders  
 - Bugfix about file deletion
