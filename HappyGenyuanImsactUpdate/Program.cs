@@ -292,6 +292,12 @@ namespace HappyGenyuanImsactUpdate
         // Check if pkg_version and Audio_pkg_version can match the real condition
         static bool PkgVersionCheck(DirectoryInfo datadir, CheckMode checkAfter)
         {
+            if (checkAfter == CheckMode.None)
+            {
+                Console.WriteLine("No checks are performed.");
+                return true;
+            }
+
             var pkgversionPaths = UpCheck.GetPkgVersion(datadir);
             if (!pkgversionPaths.Contains($"{datadir}\\pkg_version")) return false;
 
