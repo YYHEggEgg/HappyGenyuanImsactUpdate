@@ -4,6 +4,10 @@
 A hdiff-using update program of a certain anime game.
 
 ## New feature
+### v2.3.1
+- Fixed none check mode   
+  This is useful when you update process has broken halfway. You can try to update again and see if y'a lucky enough.
+
 ### v2.3.0
 - Code reconstruction
 - Bugfix about invaild input
