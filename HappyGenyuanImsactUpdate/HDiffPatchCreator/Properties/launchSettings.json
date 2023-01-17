@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "HDiffPatchCreator": {
-      "commandName": "Project",
-      "commandLineArgs": "-from \"3.2CN\" \"D:\\Program Files\\Genshin Beta\\YuanShen_3.2.0\"\r\n-to \"3.3CN\" \"D:\\Program Files\\Genshin Beta\\Yuanshen_3.3\"\r\n-output_to \"D:\\Downloads\"\r\n-p gameUpdate"
-    }
-  }
-}
