@@ -3,11 +3,11 @@ using System.Text;
 
 namespace HappyGenyuanImsactUpdate
 {
-    internal class MyMD5
+    public class MyMD5
     {
         public static string GetMD5HashFromFile(string fileName)
         {
-            FileStream file = new FileStream(fileName, FileMode.Open);
+            FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             //MD5 md5 = new MD5CryptoServiceProvider();
             MD5 md5 = MD5.Create("MD5");
             byte[] retVal = md5.ComputeHash(file);

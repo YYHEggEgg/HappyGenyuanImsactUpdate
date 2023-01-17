@@ -48,6 +48,10 @@ namespace HappyGenyuanImsactUpdate
                             //command:  -f (original file) (patch file)   (output file)
                             //  hpatchz -f name.pck        name.pck.hdiff name.pck
                             string hdiffPathstd = new FileInfo(hdiffName).FullName;
+                            // If package is created by an individual, he may include
+                            // unnecessary files like cache and live updates,
+                            // So it's essential to skip some files that doesn't exist.
+                            if (!File.Exists(hdiffPathstd)) continue;
                             var proc = Process.Start(PathHdiff,
                                 $"-f \"{hdiffName}\" \"{hdiffName}.hdiff\" \"{hdiffName}\"");
 

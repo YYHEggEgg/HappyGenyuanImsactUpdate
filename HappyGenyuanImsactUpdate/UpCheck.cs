@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HappyGenyuanImsactUpdate
 {
-    internal enum CheckMode
+    public enum CheckMode
     {
         None = 0,
         Basic = 1, //file size

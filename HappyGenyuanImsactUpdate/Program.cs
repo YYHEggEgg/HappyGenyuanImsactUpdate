@@ -6,20 +6,17 @@ using System.Diagnostics;
 
 namespace HappyGenyuanImsactUpdate
 {
-    internal class Program
+    public class Program
     {
-        static string exePath = string.Empty;
-
         static async Task Main()
         {
             Console.WriteLine("Welcome to the update program!");
 
             //Not working path, but the path where the program located
-            exePath = AppDomain.CurrentDomain.BaseDirectory;
-            CheckForTools();
+            Helper.CheckForTools();
 
-            var path7z = $"{exePath}\\7z.exe";
-            var hpatchzPath = $"{exePath}\\hpatchz.exe";
+            var path7z = $"{Helper.exePath}\\7z.exe";
+            var hpatchzPath = $"{Helper.exePath}\\hpatchz.exe";
 
             var datadir = GetDataPath();
 
@@ -239,7 +236,7 @@ namespace HappyGenyuanImsactUpdate
         #endregion
 
         #region Package Verify
-        static bool UpdateCheck(DirectoryInfo datadir, CheckMode checkAfter)
+        public static bool UpdateCheck(DirectoryInfo datadir, CheckMode checkAfter)
         {
             Console.WriteLine("Start verifying...");
             Console.WriteLine();
@@ -302,8 +299,8 @@ namespace HappyGenyuanImsactUpdate
             if (!pkgversionPaths.Contains($"{datadir}\\pkg_version")) return false;
 
             // ...\??? game\???_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows
-            string audio1 = $@"{datadir.FullName}\{certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
-            string audio2 = $@"{datadir.FullName}\{certaingame2}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string audio1 = $@"{datadir.FullName}\{Helper.certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string audio2 = $@"{datadir.FullName}\{Helper.certaingame2}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
             string[]? audio_pkgversions = null;
             if (Directory.Exists(audio1)) audio_pkgversions = Directory.GetDirectories(audio1);
             else if (Directory.Exists(audio2)) audio_pkgversions = Directory.GetDirectories(audio2);
@@ -320,38 +317,6 @@ namespace HappyGenyuanImsactUpdate
         #endregion
 
         #region Param Getting
-        static void CheckForTools()
-        {
-            bool ok = true;
-            if (!File.Exists($"{exePath}\\7z.exe"))
-            {
-                Console.WriteLine("7z.exe was missing. " +
-                    "Please copy it to the path of this program " +
-                    "or download the newest release in " +
-                    "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/releases");
-                ok = false;
-            }
-            if (!File.Exists($"{exePath}\\hpatchz.exe"))
-            {
-                Console.WriteLine("hpatchz.exe was missing. " +
-                    "Please copy it to the path of this program " +
-                    "or download the newest release in " +
-                    "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/releases");
-                ok = false;
-            }
-            if (!ok)
-            {
-                Console.WriteLine("The program will exit after an enter. " +
-                    "Please get missing file(s) the right location and restart.");
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
-        }
-
-        //"ei hei"
-        const string certaingame1 = "\u0067\u0065\u006e\u0073\u0068\u0069\u006e\u0069\u006d\u0070\u0061\u0063\u0074";
-        const string certaingame2 = "\u0079\u0075\u0061\u006e\u0073\u0068\u0065\u006e";
-
         //For standarlizing, we use a DirectoryInfo object. 
         //The same goes for the following methods. 
         static DirectoryInfo GetDataPath()
@@ -366,8 +331,8 @@ namespace HappyGenyuanImsactUpdate
             }
 
             DirectoryInfo datadir = new(dataPath);
-            if (!File.Exists($"{datadir}\\{certaingame1}.exe")
-                && !File.Exists($"{datadir}\\{certaingame2}.exe"))
+            if (!File.Exists($"{datadir}\\{Helper.certaingame1}.exe")
+                && !File.Exists($"{datadir}\\{Helper.certaingame2}.exe"))
             {
                 Console.WriteLine("Invaild game path!");
                 return GetDataPath();
@@ -399,9 +364,11 @@ namespace HappyGenyuanImsactUpdate
                 }
 
             //To protect fools who really just paste its name
-            if (zipfile.Extension != ".zip")
+            if (zipfile.Extension != ".zip" || zipfile.Extension != ".rar" || zipfile.Extension != ".7z")
             {
-                pakPath += ".zip";
+                if (File.Exists($"{pakPath}.zip")) pakPath += ".zip";
+                else if (File.Exists($"{pakPath}.rar")) pakPath += ".rar";
+                else if (File.Exists($"{pakPath}.7z")) pakPath += ".7z";
                 zipfile = new(pakPath);
             }
 
