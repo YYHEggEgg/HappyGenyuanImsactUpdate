@@ -3,12 +3,14 @@
 
 using Microsoft.Toolkit.Uwp.Notifications;
 using System.Diagnostics;
+using System.Numerics;
+using System.Web;
 
 namespace HappyGenyuanImsactUpdate
 {
     public class Program
     {
-        static async Task Main()
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Welcome to the update program!");
 
@@ -18,36 +20,115 @@ namespace HappyGenyuanImsactUpdate
             var path7z = $"{Helper.exePath}\\7z.exe";
             var hpatchzPath = $"{Helper.exePath}\\hpatchz.exe";
 
-            var datadir = GetDataPath();
-
-            Console.WriteLine();
-
-            Patch patch = new Patch(datadir, path7z, hpatchzPath);
-            // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
-            CheckMode checkAfter = (CheckMode)AskForCheck();
-
-            Console.WriteLine();
-
-            if (!PkgVersionCheck(datadir, checkAfter))
-            {
-                Console.WriteLine("Sorry, the update process was exited because the original files aren't correct.");
-                Console.WriteLine("The program will exit after an enter. ");
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
-            else Console.WriteLine("Congratulations! Check passed!");
-
-            int t = GetZipCount();
-
-            Console.WriteLine();
-
+            #region Variables
+            DirectoryInfo? datadir = null;
+            Patch patch;
+            CheckMode checkAfter = CheckMode.Null;
+            int t = 0;
             List<FileInfo> zips = new();
-            for (int i = 0; i < t; i++)
+            bool[] arghaveread = new bool[6];
+            #endregion
+
+            #region Console Usage
+            if (args.Length == 0)
             {
+                Console.WriteLine("You can also use command line like:");
+                Usage();
+
+                datadir = GetDataPath();
+
                 Console.WriteLine();
-                if (i > 0) Console.WriteLine("Now you should paste the path of another zip file.");
-                zips.Add(GetUpdatePakPath(datadir.FullName));
+                // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
+                checkAfter = (CheckMode)AskForCheck();
+
+                Console.WriteLine();
+
+                if (!PkgVersionCheck(datadir, checkAfter))
+                {
+                    Console.WriteLine("Sorry, the update process was exited because the original files aren't correct.");
+                    Console.WriteLine("The program will exit after an enter. ");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+                else Console.WriteLine("Congratulations! Check passed!");
+
+                t = GetZipCount();
+
+                Console.WriteLine();
+
+                for (int i = 0; i < t; i++)
+                {
+                    Console.WriteLine();
+                    if (i > 0) Console.WriteLine("Now you should paste the path of another zip file.");
+                    zips.Add(GetUpdatePakPath(datadir.FullName));
+                }
             }
+            #endregion
+            #region Command LIne Usage
+            else
+            {
+                #region Remove '"'
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i].StartsWith('"') && args[i].EndsWith('"'))
+                        args[i] = args[i].Substring(1, args[i].Length - 2);
+                }
+                #endregion
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i].StartsWith('"') && args[i].EndsWith('"'))
+                        args[i] = args[i].Substring(1, args[i].Length - 2);
+                }
+
+                if (args.Length > 0)
+                {
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        switch (args[i])
+                        {
+                            case "-patchAt":
+                                ReadAssert(0);
+                                datadir = new DirectoryInfo(args[i + 1]);
+                                i += 1;
+                                break;
+                            case "-checkmode":
+                                ReadAssert(1);
+                                checkAfter = (CheckMode)int.Parse(args[i + 1]);
+                                i += 1;
+                                break;
+                            case "-zip_count":
+                                ReadAssert(2);
+                                t = int.Parse(args[i + 1]);
+                                for (int j = 0; j < t; j++)
+                                {
+                                    zips.Add(new FileInfo(args[i + 2 + j]));
+                                }
+                                i += t + 1;
+                                break;
+                            default:
+                                Usage();
+                                return;
+                        }
+                    }
+                }
+                else
+                {
+                    Usage();
+                    return;
+                }
+            }
+            #endregion
+
+            #region Input lost Assert
+            if (datadir == null || checkAfter == CheckMode.Null || t == 0)
+            {
+                Usage();
+                throw new ArgumentException("Input param lack!");
+            }
+            #endregion
+
+            patch = new Patch(datadir, path7z, hpatchzPath);
 
             //Delete the original pkg_version file
             var pkgversionpaths = UpCheck.GetPkgVersion(datadir);
@@ -136,6 +217,27 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("Press Enter to continue.");
 
             Console.ReadLine();
+
+            #region Multiple Read Assert
+            void ReadAssert(int expected)
+            {
+                if (arghaveread[expected])
+                {
+                    Console.WriteLine("Duplicated param!");
+                    Environment.Exit(1);
+                }
+                arghaveread[expected] = true;
+            }
+            #endregion
+        }
+
+        private static void Usage()
+        {
+            Console.WriteLine("happygenyuanimsactupdate \r\n" +
+                "-patchAt <game_directory> \r\n" +
+                "-checkmode <0/1/2> (0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5))\r\n" +
+                "-zip_count <count> <zipPath1...n>\r\n\r\n" +
+                "e.g. happygenyuanimsactupdate -patchAt \"D:\\Game\" -checkMode 1 -zip_count 2 \"game_1_hdiff.zip\" \"zh-cn_hdiff.zip\"\r\n");
         }
 
         #region Change config for official launcher

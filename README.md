@@ -4,33 +4,18 @@
 A hdiff-using update program of a certain anime game.
 
 ## New feature
-### v2.3.1
-- Fixed none check mode   
-  This is useful when you update process has broken halfway. You can try to update again and see if y'a lucky enough.
+### v3.0.0
+Now you can create hdiff patch packages on your own, like `the anime game company`!   
+Just invoke `Patch Creater\HDiffPatchCreator.exe` in command line.
 
-### v2.3.0
-- Code reconstruction
-- Bugfix about invaild input
+Notice: It's highly recommended to **use original packages from the anime game company only** to create patches.
 
-### v2.2.1
-- Supported packages with sub folders  
-- Bugfix about file deletion
-- Delayed the update check to the end
+Files from your own computer will probably contains live updates and caches, which some users don't have. **Putting caches into the package will be likely to make your personal information got leaked.**
 
-### v2.1.2   
-- If you're using an official version, the update package are usually located in the game folder.       
-  We have added support in this case. Now, when you're pasting the name of `zip` file, we'll think of it as a **relative path**, which is located in the game data folder.
-- Now, the program will ask you whether to delete the update package. They aren't needed after update.
-- Optimized Update check process - **If the files are not correct before updating, further updates won't be allowed.**   
-
-### v2.0
-Now, if you are using an official version (downloaded by launcher), the program will help you change `config.ini` to make launcher display the correct version.    
-In most cases, the program can automatically judge the version you're updating to, but it needs you to confirm.    
-If it happens, the program will send a message (on Windows 10), so you can still minimum the console, do other things, and you'll receive message if needed.    
-
-In v2.0+, You'll also receive message if update process has been finished, so you can know it at once.
+You can turn to this repository to download files from `the anime game company`: [Downloads Archive](https://github.com/Angoks/GI-Download-Library)
 
 ## Usage
+### How to use the patcher / Updater
 You should have the following things:
 
 - A game (for sure)
@@ -48,3 +33,20 @@ Then, you need to type how many zip files you have.
 After that, you just need to paste all paths of zip files at a time, then the update program will finish the update process automatically.
 
 Enjoy it!
+
+### How to create a patch / Patch Creater
+You can refer to the following command line usage.
+```
+Usage: hdiffpatchcreator
+  -from <versionFrom> <source_directory>
+  -to <versionTo> <target_directory>
+  -output_to <output_zip_directory>
+  [-p <prefix>] [-reverse] [--skip-check]
+```
+  
+By using this program, you can get a package named: 
+```
+[prefix]_<versionFrom>_<versionTo>_hdiff_<randomstr>.zip
+```
+e.g. `game_3.4_8.0_hdiff_nj89iGjh4d.zip`
+If not given, prefix will be `game`.
