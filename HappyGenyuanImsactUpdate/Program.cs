@@ -3,54 +3,132 @@
 
 using Microsoft.Toolkit.Uwp.Notifications;
 using System.Diagnostics;
+using System.Numerics;
+using System.Web;
 
 namespace HappyGenyuanImsactUpdate
 {
-    internal class Program
+    public class Program
     {
-        static string exePath = string.Empty;
-
-        static async Task Main()
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Welcome to the update program!");
 
             //Not working path, but the path where the program located
-            exePath = AppDomain.CurrentDomain.BaseDirectory;
-            CheckForTools();
+            Helper.CheckForTools();
 
-            var path7z = $"{exePath}\\7z.exe";
-            var hpatchzPath = $"{exePath}\\hpatchz.exe";
+            var path7z = $"{Helper.exePath}\\7z.exe";
+            var hpatchzPath = $"{Helper.exePath}\\hpatchz.exe";
 
-            var datadir = GetDataPath();
-
-            Console.WriteLine();
-
-            Patch patch = new Patch(datadir, path7z, hpatchzPath);
-            // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
-            CheckMode checkAfter = (CheckMode)AskForCheck();
-
-            Console.WriteLine();
-
-            if (!PkgVersionCheck(datadir, checkAfter))
-            {
-                Console.WriteLine("Sorry, the update process was exited because the original files aren't correct.");
-                Console.WriteLine("The program will exit after an enter. ");
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
-            else Console.WriteLine("Congratulations! Check passed!");
-
-            int t = GetZipCount();
-
-            Console.WriteLine();
-
+            #region Variables
+            DirectoryInfo? datadir = null;
+            Patch patch;
+            CheckMode checkAfter = CheckMode.Null;
+            int t = 0;
             List<FileInfo> zips = new();
-            for (int i = 0; i < t; i++)
+            bool[] arghaveread = new bool[6];
+            #endregion
+
+            #region Console Usage
+            if (args.Length == 0)
             {
+                Console.WriteLine("You can also use command line like:");
+                Usage();
+
+                datadir = GetDataPath();
+
                 Console.WriteLine();
-                if (i > 0) Console.WriteLine("Now you should paste the path of another zip file.");
-                zips.Add(GetUpdatePakPath(datadir.FullName));
+                // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
+                checkAfter = (CheckMode)AskForCheck();
+
+                Console.WriteLine();
+
+                if (!PkgVersionCheck(datadir, checkAfter))
+                {
+                    Console.WriteLine("Sorry, the update process was exited because the original files aren't correct.");
+                    Console.WriteLine("The program will exit after an enter. ");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+                else Console.WriteLine("Congratulations! Check passed!");
+
+                t = GetZipCount();
+
+                Console.WriteLine();
+
+                for (int i = 0; i < t; i++)
+                {
+                    Console.WriteLine();
+                    if (i > 0) Console.WriteLine("Now you should paste the path of another zip file.");
+                    zips.Add(GetUpdatePakPath(datadir.FullName));
+                }
             }
+            #endregion
+            #region Command LIne Usage
+            else
+            {
+                #region Remove '"'
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i].StartsWith('"') && args[i].EndsWith('"'))
+                        args[i] = args[i].Substring(1, args[i].Length - 2);
+                }
+                #endregion
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i].StartsWith('"') && args[i].EndsWith('"'))
+                        args[i] = args[i].Substring(1, args[i].Length - 2);
+                }
+
+                if (args.Length > 0)
+                {
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        switch (args[i])
+                        {
+                            case "-patchAt":
+                                ReadAssert(0);
+                                datadir = new DirectoryInfo(args[i + 1]);
+                                i += 1;
+                                break;
+                            case "-checkmode":
+                                ReadAssert(1);
+                                checkAfter = (CheckMode)int.Parse(args[i + 1]);
+                                i += 1;
+                                break;
+                            case "-zip_count":
+                                ReadAssert(2);
+                                t = int.Parse(args[i + 1]);
+                                for (int j = 0; j < t; j++)
+                                {
+                                    zips.Add(new FileInfo(args[i + 2 + j]));
+                                }
+                                i += t + 1;
+                                break;
+                            default:
+                                Usage();
+                                return;
+                        }
+                    }
+                }
+                else
+                {
+                    Usage();
+                    return;
+                }
+            }
+            #endregion
+
+            #region Input lost Assert
+            if (datadir == null || checkAfter == CheckMode.Null || t == 0)
+            {
+                Usage();
+                throw new ArgumentException("Input param lack!");
+            }
+            #endregion
+
+            patch = new Patch(datadir, path7z, hpatchzPath);
 
             //Delete the original pkg_version file
             var pkgversionpaths = UpCheck.GetPkgVersion(datadir);
@@ -139,6 +217,27 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("Press Enter to continue.");
 
             Console.ReadLine();
+
+            #region Multiple Read Assert
+            void ReadAssert(int expected)
+            {
+                if (arghaveread[expected])
+                {
+                    Console.WriteLine("Duplicated param!");
+                    Environment.Exit(1);
+                }
+                arghaveread[expected] = true;
+            }
+            #endregion
+        }
+
+        private static void Usage()
+        {
+            Console.WriteLine("happygenyuanimsactupdate \r\n" +
+                "-patchAt <game_directory> \r\n" +
+                "-checkmode <0/1/2> (0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5))\r\n" +
+                "-zip_count <count> <zipPath1...n>\r\n\r\n" +
+                "e.g. happygenyuanimsactupdate -patchAt \"D:\\Game\" -checkMode 1 -zip_count 2 \"game_1_hdiff.zip\" \"zh-cn_hdiff.zip\"\r\n");
         }
 
         #region Change config for official launcher
@@ -239,7 +338,7 @@ namespace HappyGenyuanImsactUpdate
         #endregion
 
         #region Package Verify
-        static bool UpdateCheck(DirectoryInfo datadir, CheckMode checkAfter)
+        public static bool UpdateCheck(DirectoryInfo datadir, CheckMode checkAfter)
         {
             Console.WriteLine("Start verifying...");
             Console.WriteLine();
@@ -302,8 +401,8 @@ namespace HappyGenyuanImsactUpdate
             if (!pkgversionPaths.Contains($"{datadir}\\pkg_version")) return false;
 
             // ...\??? game\???_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows
-            string audio1 = $@"{datadir.FullName}\{certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
-            string audio2 = $@"{datadir.FullName}\{certaingame2}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string audio1 = $@"{datadir.FullName}\{Helper.certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string audio2 = $@"{datadir.FullName}\{Helper.certaingame2}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
             string[]? audio_pkgversions = null;
             if (Directory.Exists(audio1)) audio_pkgversions = Directory.GetDirectories(audio1);
             else if (Directory.Exists(audio2)) audio_pkgversions = Directory.GetDirectories(audio2);
@@ -320,38 +419,6 @@ namespace HappyGenyuanImsactUpdate
         #endregion
 
         #region Param Getting
-        static void CheckForTools()
-        {
-            bool ok = true;
-            if (!File.Exists($"{exePath}\\7z.exe"))
-            {
-                Console.WriteLine("7z.exe was missing. " +
-                    "Please copy it to the path of this program " +
-                    "or download the newest release in " +
-                    "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/releases");
-                ok = false;
-            }
-            if (!File.Exists($"{exePath}\\hpatchz.exe"))
-            {
-                Console.WriteLine("hpatchz.exe was missing. " +
-                    "Please copy it to the path of this program " +
-                    "or download the newest release in " +
-                    "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/releases");
-                ok = false;
-            }
-            if (!ok)
-            {
-                Console.WriteLine("The program will exit after an enter. " +
-                    "Please get missing file(s) the right location and restart.");
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
-        }
-
-        //"ei hei"
-        const string certaingame1 = "\u0067\u0065\u006e\u0073\u0068\u0069\u006e\u0069\u006d\u0070\u0061\u0063\u0074";
-        const string certaingame2 = "\u0079\u0075\u0061\u006e\u0073\u0068\u0065\u006e";
-
         //For standarlizing, we use a DirectoryInfo object. 
         //The same goes for the following methods. 
         static DirectoryInfo GetDataPath()
@@ -366,8 +433,8 @@ namespace HappyGenyuanImsactUpdate
             }
 
             DirectoryInfo datadir = new(dataPath);
-            if (!File.Exists($"{datadir}\\{certaingame1}.exe")
-                && !File.Exists($"{datadir}\\{certaingame2}.exe"))
+            if (!File.Exists($"{datadir}\\{Helper.certaingame1}.exe")
+                && !File.Exists($"{datadir}\\{Helper.certaingame2}.exe"))
             {
                 Console.WriteLine("Invaild game path!");
                 return GetDataPath();
@@ -399,9 +466,11 @@ namespace HappyGenyuanImsactUpdate
                 }
 
             //To protect fools who really just paste its name
-            if (zipfile.Extension != ".zip")
+            if (zipfile.Extension != ".zip" || zipfile.Extension != ".rar" || zipfile.Extension != ".7z")
             {
-                pakPath += ".zip";
+                if (File.Exists($"{pakPath}.zip")) pakPath += ".zip";
+                else if (File.Exists($"{pakPath}.rar")) pakPath += ".rar";
+                else if (File.Exists($"{pakPath}.7z")) pakPath += ".7z";
                 zipfile = new(pakPath);
             }
 

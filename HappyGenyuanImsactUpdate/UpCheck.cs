@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 
 namespace HappyGenyuanImsactUpdate
 {
-    internal enum CheckMode
+    public enum CheckMode
     {
         None = 0,
         Basic = 1, //file size
         Full = 2, //size + md5
+        Null = -1
     }
 
     internal static class UpCheck

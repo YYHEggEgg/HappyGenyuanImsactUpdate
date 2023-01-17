@@ -22,7 +22,9 @@ namespace HappyGenyuanImsactUpdate
             int endidx = substr.IndexOf('_', veridx + 1);
             if (veridx == -1 || endidx == -1) return string.Empty;
             string rtn = substr.Substring(veridx + 1, endidx - veridx - 1);
-            return VerifyVersionString(rtn) ? rtn : string.Empty;
+            // Custom packages may not use standard version string.
+            // return VerifyVersionString(rtn) ? rtn : string.Empty;
+            return rtn;
         }
 
         public static string FindToVersion(string zipName)
@@ -33,7 +35,8 @@ namespace HappyGenyuanImsactUpdate
             int veridx = substr.LastIndexOf('_');
             if (veridx == -1) return string.Empty;
             string rtn = substr.Substring(veridx + 1, substr.Length - veridx - 1);
-            return VerifyVersionString(rtn) ? rtn : string.Empty;
+            // return VerifyVersionString(rtn) ? rtn : string.Empty;
+            return rtn;
         }
 
         public static bool VerifyVersionString(string verstr)
