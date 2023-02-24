@@ -237,7 +237,7 @@ namespace HappyGenyuanImsactUpdate
                 "-patchAt <game_directory> \r\n" +
                 "-checkmode <0/1/2> (0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5))\r\n" +
                 "-zip_count <count> <zipPath1...n>\r\n\r\n" +
-                "e.g. happygenyuanimsactupdate -patchAt \"D:\\Game\" -checkMode 1 -zip_count 2 \"game_1_hdiff.zip\" \"zh-cn_hdiff.zip\"\r\n");
+                "e.g. happygenyuanimsactupdate -patchAt \"D:\\Game\" -checkmode 1 -zip_count 2 \"game_1_hdiff.zip\" \"zh-cn_hdiff.zip\"\r\n");
         }
 
         #region Change config for official launcher

@@ -86,14 +86,14 @@ namespace HDiffPatchCreator
                 Usage();
                 throw new ArgumentException("Input param lack!");
             }
-            if (!File.Exists($"{verFrom}\\{Helper.certaingame1}.exe")
-                && !File.Exists($"{verFrom}\\{Helper.certaingame2}.exe"))
+            if (!File.Exists($"{dirFrom}\\{Helper.certaingame1}.exe")
+                && !File.Exists($"{dirFrom}\\{Helper.certaingame2}.exe"))
             {
                 Console.WriteLine("Invaild game path! (verFrom)");
                 Environment.Exit(1);
             }
-            if (!File.Exists($"{verTo}\\{Helper.certaingame1}.exe")
-                && !File.Exists($"{verTo}\\{Helper.certaingame2}.exe"))
+            if (!File.Exists($"{dirTo}\\{Helper.certaingame1}.exe")
+                && !File.Exists($"{dirTo}\\{Helper.certaingame2}.exe"))
             {
                 Console.WriteLine("Invaild game path! (verTo)");
                 Environment.Exit(1);
