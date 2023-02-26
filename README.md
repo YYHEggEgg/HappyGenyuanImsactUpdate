@@ -4,6 +4,13 @@
 A hdiff-using update program of a certain anime game.
 
 ## New feature
+### v3.0.2
+Modified the command line usage and added more switches for the Updater. You may get usage help from running:
+```cmd
+Updater\happygenyuanimsactupdate -?
+```
+You can still open the program directly to go through the update guide.
+
 ### v3.0.0
 Now you can create hdiff patch packages on your own, like `the anime game company`!   
 Just invoke `Patch Creater\HDiffPatchCreator.exe` in command line.
