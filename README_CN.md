@@ -4,6 +4,13 @@
 A hdiff-using update program of a certain anime game.
 
 ## 新版本特性
+### v3.0.2
+为更新器增加了一些命令行开关。您可以通过以下命令查看使用方法：
+```cmd
+Updater\happygenyuanimsactupdate -?
+```
+直接打开程序仍可以使用更新向导。
+
 ### v3.0.0
 现在您可以像官方一样自己创建更新包了！    
 使用命令行调用 `Patch Creater\HDiffPatchCreator.exe` 即可。
