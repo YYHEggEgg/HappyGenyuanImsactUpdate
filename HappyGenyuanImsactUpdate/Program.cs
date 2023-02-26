@@ -26,7 +26,11 @@ namespace HappyGenyuanImsactUpdate
             CheckMode checkAfter = CheckMode.Null;
             int t = 0;
             List<FileInfo> zips = new();
+            bool ifconfigchange = true;
+            bool? ifdeletepackage = null;
             bool[] arghaveread = new bool[6];
+
+            bool usingcommandline = false;
             #endregion
 
             #region Console Usage
@@ -67,11 +71,13 @@ namespace HappyGenyuanImsactUpdate
             #region Command LIne Usage
             else
             {
-                #region Remove '"'
+                usingcommandline = true;
+
+                #region Remove '.\'
                 for (int i = 0; i < args.Length; i++)
                 {
-                    if (args[i].StartsWith('"') && args[i].EndsWith('"'))
-                        args[i] = args[i].Substring(1, args[i].Length - 2);
+                    if (args[i].StartsWith('.'))
+                        args[i] = args[i].Substring(1);
                 }
                 #endregion
 
@@ -106,6 +112,15 @@ namespace HappyGenyuanImsactUpdate
                                 }
                                 i += t + 1;
                                 break;
+                            case "--config_change_guidance":
+                                ReadAssert(3);
+                                ifconfigchange = bool.Parse(args[i + 1]);
+                                i += 1;
+                                break;
+                            case "--delete_update_packages":
+                                ReadAssert(4);
+                                ifdeletepackage = true;
+                                break;
                             default:
                                 Usage();
                                 return;
@@ -117,6 +132,8 @@ namespace HappyGenyuanImsactUpdate
                     Usage();
                     return;
                 }
+
+                ifdeletepackage ??= false;
             }
             #endregion
 
@@ -191,7 +208,8 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine();
 
             // Change the config.ini of official launcher
-            ConfigChange(datadir, zips[0], zips[zips.Count - 1]);
+            if ((usingcommandline && ifconfigchange) || !usingcommandline)
+                ConfigChange(datadir, zips[0], zips[zips.Count - 1]);
             Console.WriteLine();
 
             // Handling with delayed deletions
@@ -210,7 +228,7 @@ namespace HappyGenyuanImsactUpdate
                     .Show();
             }
 
-            DeleteZipFiles(zips);
+            DeleteZipFiles(zips, ifdeletepackage);
             Console.WriteLine();
 
             Console.WriteLine("Update process is done!");
@@ -236,8 +254,12 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("happygenyuanimsactupdate \r\n" +
                 "-patchAt <game_directory> \r\n" +
                 "-checkmode <0/1/2> (0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5))\r\n" +
-                "-zip_count <count> <zipPath1...n>\r\n\r\n" +
-                "e.g. happygenyuanimsactupdate -patchAt \"D:\\Game\" -checkmode 1 -zip_count 2 \"game_1_hdiff.zip\" \"zh-cn_hdiff.zip\"\r\n");
+                "-zip_count <count> <zipPath1...n> \r\n" +
+                "[--config_change_guidance <true/false>] (change the showing version of official launcher, default is true)\r\n" +
+                "[--delete_update_packages] (delete update packages, won't delete if the param isn't given)" +
+                "\r\n\r\n" +
+                "e.g. happygenyuanimsactupdate -patchAt \"D:\\Game\" -checkmode 1 -zip_count 2 \"game_1_hdiff.zip\" \"zh-cn_hdiff.zip\" " +
+                "--config_change_guidance false\r\n");
         }
 
         #region Change config for official launcher
@@ -518,33 +540,47 @@ namespace HappyGenyuanImsactUpdate
         #endregion
 
         #region Delete Update Zip File
-        static void DeleteZipFiles(List<FileInfo> zips)
+        /// <param name="delete">true=delete; false=reserve; null=not given, ask the user</param>
+        static void DeleteZipFiles(List<FileInfo> zips, bool? delete = null)
         {
-            Console.WriteLine("The pre-download packages aren't needed any more.");
-            Console.WriteLine("Do you want to delete them? Type 'y' to accept or 'n' to refuse.");
-            string? s = Console.ReadLine();
-            if (s == null)
+            if (delete == null)
             {
-                Console.WriteLine("Invaild input!");
-                DeleteZipFiles(zips);
-                return;
-            }
-            else if (s.ToLower() == "y")
-            {
-                foreach (var zip in zips)
+                Console.WriteLine("The pre-download packages aren't needed any more.");
+                Console.WriteLine("Do you want to delete them? Type 'y' to accept or 'n' to refuse.");
+                string? s = Console.ReadLine();
+                if (s == null)
                 {
-                    zip.Delete();
+                    Console.WriteLine("Invaild input!");
+                    DeleteZipFiles(zips);
+                    return;
                 }
-            }
-            else if (s.ToLower() == "n")
-            {
-                return;
+                else if (s.ToLower() == "y")
+                {
+                    foreach (var zip in zips)
+                    {
+                        zip.Delete();
+                    }
+                }
+                else if (s.ToLower() == "n")
+                {
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("Invaild input!");
+                    DeleteZipFiles(zips);
+                    return;
+                }
             }
             else
             {
-                Console.WriteLine("Invaild input!");
-                DeleteZipFiles(zips);
-                return;
+                if ((bool)delete)
+                {
+                    foreach (var zip in zips)
+                    {
+                        zip.Delete();
+                    }
+                }
             }
         }
         #endregion
