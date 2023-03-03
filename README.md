@@ -4,9 +4,9 @@
 A hdiff-using update program of a certain anime game.
 
 ## New feature
-### v3.0.3
+### v3.1.0
 #### Updater
-Have some bugfix and fully support drag files/directories. **Notice that running this program as Administrator will make this feature unavaliable.**
+Have some bugfix about pkg_version reserve and verify. 
 
 ### v3.0.0
 Now you can create hdiff patch packages on your own, like `the anime game company`!   

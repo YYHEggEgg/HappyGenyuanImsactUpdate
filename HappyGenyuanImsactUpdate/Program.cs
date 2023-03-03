@@ -146,11 +146,13 @@ namespace HappyGenyuanImsactUpdate
 
             patch = new Patch(datadir, path7z, hpatchzPath);
 
-            //Delete the original pkg_version file
+            // Backup the original pkg_version file
             var pkgversionpaths = UpCheck.GetPkgVersion(datadir);
             foreach (var pkgversionpath in pkgversionpaths)
             {
-                File.Delete(pkgversionpath);
+                FileInfo pkgver = new(pkgversionpath);
+                if (pkgver.Name == "pkg_version") continue;
+                File.Move(pkgversionpath, $"{Helper.tempPath}\\{pkgver.Name}");
             }
 
             // Due to some reasons, if the deleted files are not there,
@@ -200,6 +202,37 @@ namespace HappyGenyuanImsactUpdate
             }
             else Console.WriteLine("Congratulations! Check passed!");
 
+            foreach (var pkgversionpath in pkgversionpaths)
+            {
+                FileInfo pkgver = new(pkgversionpath);
+                if (pkgver.Name == "pkg_version") continue;
+                if (pkgver.Exists) continue; // pkg_version Overrided
+
+                var backuppath = $"{Helper.tempPath}\\{pkgver.Name}";
+                File.Move(backuppath, pkgversionpath);
+                if (checkAfter == CheckMode.None)
+                {
+                    Console.WriteLine($"WARNING: {pkgver.Name} hasn't checked and may not fit the current version.");
+                    continue;
+                }
+
+                var checkres = UpCheck.CheckByPkgVersion(datadir, pkgversionpath, checkAfter,
+                    str =>
+                    {
+                        Console.WriteLine(str);
+                        if (!str.StartsWith("ERROR"))
+                        {
+                            // Clear the content in Console
+                            ClearWrittenLine(str);
+                        }
+                    });
+
+                if (!checkres)
+                {
+                    Console.WriteLine($"WARNING: {pkgver.Name} isn't fit with current version any more. You may fix the error or remove the file under the game data directory.");
+                }
+            }
+
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("---------------------------");
@@ -230,7 +263,10 @@ namespace HappyGenyuanImsactUpdate
             DeleteZipFiles(zips, ifdeletepackage);
             Console.WriteLine();
 
+            Helper.TryDisposeTempFiles();
+
             Console.WriteLine("Update process is done!");
+
             Console.WriteLine("Press Enter to continue.");
 
             Console.ReadLine();
@@ -383,8 +419,11 @@ namespace HappyGenyuanImsactUpdate
                 str =>
                 {
                     Console.WriteLine(str);
-                    // Clear the content in Console
-                    ClearWrittenLine(str);
+                    if (!str.StartsWith("ERROR"))
+                    {
+                        // Clear the content in Console
+                        ClearWrittenLine(str);
+                    }
                 });
         }
 
