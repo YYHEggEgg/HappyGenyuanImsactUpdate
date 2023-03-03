@@ -4,12 +4,8 @@
 A hdiff-using update program of a certain anime game.
 
 ## 新版本特性
-### v3.0.2
-为更新器增加了一些命令行开关。您可以通过以下命令查看使用方法：
-```cmd
-Updater\happygenyuanimsactupdate -?
-```
-直接打开程序仍可以使用更新向导。
+### v3.0.3
+修复了一些 bug，完全支持了拖入文件或文件夹。**注意：以管理员身份运行该程序将会使其失效。**
 
 ### v3.0.0
 现在您可以像官方一样自己创建更新包了！    
