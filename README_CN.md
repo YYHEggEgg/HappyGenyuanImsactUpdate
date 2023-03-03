@@ -4,8 +4,8 @@
 A hdiff-using update program of a certain anime game.
 
 ## 新版本特性
-### v3.0.3
-修复了一些 bug，完全支持了拖入文件或文件夹。**注意：以管理员身份运行该程序将会使其失效。**
+### v3.1.0
+修复了一些 bug，现在程序不会删除并没有更新的 *_pkg_version了。
 
 ### v3.0.0
 现在您可以像官方一样自己创建更新包了！    
