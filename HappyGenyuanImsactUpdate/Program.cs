@@ -83,8 +83,7 @@ namespace HappyGenyuanImsactUpdate
 
                 for (int i = 0; i < args.Length; i++)
                 {
-                    if (args[i].StartsWith('"') && args[i].EndsWith('"'))
-                        args[i] = args[i].Substring(1, args[i].Length - 2);
+                    args[i] = RemoveDoubleQuotes(args[i]) ?? string.Empty;
                 }
 
                 if (args.Length > 0)
@@ -447,7 +446,7 @@ namespace HappyGenyuanImsactUpdate
         {
             Console.WriteLine("Paste the full path of game directory here. " +
                 "It's usually ended with \"Genyuan Imsact game\".");
-            string? dataPath = Console.ReadLine();
+            string? dataPath = RemoveDoubleQuotes(Console.ReadLine());
             if (dataPath == null || dataPath == string.Empty)
             {
                 Console.WriteLine("Invaild game path!");
@@ -469,7 +468,7 @@ namespace HappyGenyuanImsactUpdate
             Console.WriteLine("Paste the full path of update package here. " +
                 "It should be a zip file.");
             Console.WriteLine("If it's under the game directory, you can just paste the name of zip file here.");
-            string? pakPath = Console.ReadLine();
+            string? pakPath = RemoveDoubleQuotes(Console.ReadLine());
             if (pakPath == null || pakPath == string.Empty)
             {
                 Console.WriteLine("Invaild update package!");
@@ -584,5 +583,13 @@ namespace HappyGenyuanImsactUpdate
             }
         }
         #endregion
+
+        public static string? RemoveDoubleQuotes(string? str)
+        {
+            if (str == null) return null;
+            if (str.StartsWith('"') && str.EndsWith('"'))
+                return str.Substring(1, str.Length - 2);
+            else return str;
+        }
     }
 }
