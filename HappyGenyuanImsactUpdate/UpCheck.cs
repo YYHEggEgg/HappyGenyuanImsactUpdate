@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
 namespace HappyGenyuanImsactUpdate
 {
@@ -45,7 +40,7 @@ namespace HappyGenyuanImsactUpdate
         #endregion
 
         #region Package Check
-        public static bool CheckByPkgVersion(DirectoryInfo datadir, List<string> pkgversionPaths, 
+        public static bool CheckByPkgVersion(DirectoryInfo datadir, List<string> pkgversionPaths,
             CheckMode checkAfter, Action<string> log)
         {
             if (checkAfter == CheckMode.None) return true;
@@ -54,61 +49,72 @@ namespace HappyGenyuanImsactUpdate
 
             foreach (var pkgversionPath in pkgversionPaths)
             {
-                using (StreamReader versionreader = new(pkgversionPath))
+                checkPassed = checkPassed && CheckByPkgVersion(datadir, pkgversionPath, checkAfter, log);
+            }
+
+            return checkPassed;
+        }
+
+        public static bool CheckByPkgVersion(DirectoryInfo datadir, string pkgversionPath,
+            CheckMode checkAfter, Action<string> log)
+        {
+            if (checkAfter == CheckMode.None) return true;
+
+            bool checkPassed = true;
+            using (StreamReader versionreader = new(pkgversionPath))
+            {
+                while (true)
                 {
-                    while (true)
+                    string? output = versionreader.ReadLine();
+                    if (output == null) break;
+                    else
                     {
-                        string? output = versionreader.ReadLine();
-                        if (output == null) break;
-                        else
+                        var doce = JsonDocument.Parse(output).RootElement;
+                        /* {
+                         *      "remoteName": "name.pck",
+                         *      "md5": "123456QWERTYUIOPASDFGHJKLZXCVBNM",
+                         *      "fileSize": 1919810
+                         * }
+                         */
+                        string checkName = datadir.FullName + '\\'
+                            + doce.GetProperty("remoteName").GetString();
+                        //command:  -f (original file) (patch file)   (output file)
+                        //  hpatchz -f name.pck        name.pck.hdiff name.pck
+                        var checkFile = new FileInfo(checkName);
+                        string checkPathstd = checkFile.FullName;
+
+                        log($"Checking: {checkPathstd}");
+
+                        if (!File.Exists(checkPathstd))
                         {
-                            var doce = JsonDocument.Parse(output).RootElement;
-                            /* {
-                             *      "remoteName": "name.pck",
-                             *      "md5": "123456QWERTYUIOPASDFGHJKLZXCVBNM",
-                             *      "fileSize": 1919810
-                             * }
-                             */
-                            string checkName = datadir.FullName + '\\'
-                                + doce.GetProperty("remoteName").GetString();
-                            //command:  -f (original file) (patch file)   (output file)
-                            //  hpatchz -f name.pck        name.pck.hdiff name.pck
-                            var checkFile = new FileInfo(checkName);
-                            string checkPathstd = checkFile.FullName;
+                            log(ReportFileError(checkPathstd, "The file does not exist"));
+                            checkPassed = false;
+                            continue;
+                        }
 
-                            log($"Checking: {checkPathstd}");
+                        RemoveReadOnly(checkFile);
 
-                            if (!File.Exists(checkPathstd))
-                            {
-                                log(ReportFileError(checkPathstd, "The file does not exist"));
-                                checkPassed = false;
-                                continue;
-                            }
+                        #region File Size Check
+                        long sizeExpected = doce.GetProperty("fileSize").GetInt64();
+                        if (checkFile.Length != sizeExpected)
+                        {
+                            log(ReportFileError(checkPathstd, "The file is not correct"));
+                            checkPassed = false;
+                            continue;
+                        }
+                        #endregion
 
-                            RemoveReadOnly(checkFile);
-
-                            #region File Size Check
-                            long sizeExpected = doce.GetProperty("fileSize").GetInt64();
-                            if (checkFile.Length != sizeExpected)
+                        if (checkAfter == CheckMode.Full)
+                        {
+                            #region MD5 Check
+                            string md5Expected = doce.GetProperty("md5").GetString();
+                            if (MyMD5.GetMD5HashFromFile(checkPathstd) != md5Expected)
                             {
                                 log(ReportFileError(checkPathstd, "The file is not correct"));
                                 checkPassed = false;
                                 continue;
                             }
                             #endregion
-
-                            if (checkAfter == CheckMode.Full)
-                            {
-                                #region MD5 Check
-                                string md5Expected = doce.GetProperty("md5").GetString();
-                                if (MyMD5.GetMD5HashFromFile(checkPathstd) != md5Expected)
-                                {
-                                    log(ReportFileError(checkPathstd, "The file is not correct"));
-                                    checkPassed = false;
-                                    continue;
-                                }
-                                #endregion
-                            }
                         }
                     }
                 }
@@ -125,7 +131,7 @@ namespace HappyGenyuanImsactUpdate
 
         private static string ReportFileError(string checkPathstd, string reason)
         {
-            return $"{reason} : {checkPathstd}";
+            return $"ERROR: {reason} : {checkPathstd}";
         }
         #endregion
     }
