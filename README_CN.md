@@ -3,6 +3,25 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
 
+## 公告
+
+### [请勿使用该程序来更新至3.6版本](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)
+
+从3.6开始，miHoYo 将 `StreamingAssets/Audio/GeneratedSoundBanks/Windows` 更改为 `StreamingAssets/AudioAssets`，但由启动器负责修改，不包含在更新包中。
+
+这不会被修复，因为代码可能面临被污染的风险。
+
+很明显，miHoYo在这个更改上做得不好—— `StreamingAssets/Audio/GeneratedSoundBanks/Windows` 和 `StreamingAssets/AudioAssets` 中的原始文件是相等的，但启动器选择不移动文件，而是重新下载它们（可能是因为他们也不想污染代码）。
+
+如果您想节省时间，请按照以下步骤操作：
+- 创建目录 `StreamingAssets/AudioAssets`。
+- 将 `StreamingAssets/Audio/GeneratedSoundBanks/Windows` 中的所有内容移动到 `StreamingAssets/AudioAssets` 中。
+- 打开更新器，按照以前的常规更新方法进行操作即可。
+
+如果您不知道您在做什么，请使用官方启动器进行更新。
+
+这很可能是一个临时的特例，**此更新程序在以后的版本中仍将可用**。 
+
 ## 新版本特性
 ### v3.1.0
 修复了一些 bug，现在程序不会删除并没有更新的 *_pkg_version了。

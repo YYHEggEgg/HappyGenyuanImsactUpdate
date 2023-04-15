@@ -3,6 +3,25 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
 
+## Annoucements
+
+### [Don't use this for ->3.6 Update](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)
+From 3.6, miHoYo changed `StreamingAssets/Audio/GeneratedSoundBanks/Windows` to `StreamingAssets/AudioAssets`, but the launcher is responsible for the modification, not the update package.  
+
+This won't be fixed as I don't want to pollute the code any more. 
+
+It's obvious that miHoYo seems didn't do well on this change - the original files in `StreamingAssets/Audio/GeneratedSoundBanks/Windows` and `StreamingAssets/AudioAssets` are equal, but the launcher chooses not to move files **but to redownload them** _(probably because they also don't want to pollute the code)_.
+
+If you want to save time, follow these steps:
+- Create directory `StreamingAssets/AudioAssets`.
+- Move all contents from `StreamingAssets/Audio/GeneratedSoundBanks/Windows` to `StreamingAssets/AudioAssets`.
+- Open Updater, follow common update methods like before.
+- Profit.
+
+If you don't know what that's doint, please use official Launcher to update. 
+
+This is most probably a temporaily a corner case and **this Updater program will still be avaliable in further versions**.
+
 ## New feature
 ### v3.1.0
 #### Updater
