@@ -22,6 +22,7 @@ namespace HappyGenyuanImsactUpdate
                 debug_LogWriter_AutoFlush: true));
 
             Log.Info($"Welcome to the update program! (v{Environment.Version})");
+            Helper.CheckForRunningInZipFile();
 
             //Not working path, but the path where the program located
             Helper.CheckForTools();

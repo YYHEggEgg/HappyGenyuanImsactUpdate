@@ -22,6 +22,7 @@ namespace HDiffPatchCreator
                 debug_LogWriter_AutoFlush: true));
 
             Log.Info("----------Happy hdiff creator----------");
+            Helper.CheckForRunningInZipFile();
 
             Helper.CheckForTools();
 

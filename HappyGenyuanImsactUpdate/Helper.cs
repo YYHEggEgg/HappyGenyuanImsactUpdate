@@ -94,5 +94,16 @@ namespace HappyGenyuanImsactUpdate
                 Log.Warn($"Failed to delete program temp files. You may delete directory {_tmpdir} by yourself.", nameof(TryDisposeTempFiles));
             }
         }
+
+        public static void CheckForRunningInZipFile()
+        {
+            if (Environment.CurrentDirectory.StartsWith(
+                $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}/Local/Temp"))
+            {
+                Log.Warn("You may be running the program without extracting, and that will make" +
+                    "logs lost since closing the zip file. ");
+                Log.Warn("Consider extracting the program in case you meet some problem updating.");
+            }
+        }
     }
 }
