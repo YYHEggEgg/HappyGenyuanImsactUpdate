@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Web;
 using YYHEggEgg.Logger;
+using YYHEggEgg.Utils;
 
 namespace HDiffPatchCreator
 {
@@ -11,7 +12,7 @@ namespace HDiffPatchCreator
         static string path7z = $"{Helper.exePath}\\7z.exe";
         static string hdiffzPath = $"{Helper.exePath}\\hdiffz.exe";
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Log.Initialize(new LoggerConfig(
                 max_Output_Char_Count: -1,
@@ -140,12 +141,12 @@ namespace HDiffPatchCreator
             }
             #endregion
 
-            CreatePatch(list1, list2, dirFrom, dirTo,
+            await CreatePatch(list1, list2, dirFrom, dirTo,
                 $"{outputAt}\\{prefix}_{verFrom}_{verTo}_hdiff_{Randomstr(16)}.zip", cmp);
 
             if (createReverse)
             {
-                CreatePatch(list2, list1, dirTo, dirFrom,
+                await CreatePatch(list2, list1, dirTo, dirFrom,
                     $"{outputAt}\\{prefix}_{verTo}_{verFrom}_hdiff_{Randomstr(16)}.zip", cmp);
             }
 
@@ -180,7 +181,7 @@ namespace HDiffPatchCreator
             Log.Info("You can't choose not to use it.", "CommandLine");
         }
 
-        static void CreatePatch(IEnumerable<FileInfo> filesFrom, IEnumerable<FileInfo> filesTo,
+        static async Task CreatePatch(IEnumerable<FileInfo> filesFrom, IEnumerable<FileInfo> filesTo,
             DirectoryInfo dirFrom, DirectoryInfo dirTo, string createpakPath, FileCompare cmp)
         {
             var tmpFilePath = $"{new FileInfo(createpakPath).DirectoryName}\\Temp-{Randomstr(32)}";
@@ -234,7 +235,7 @@ namespace HDiffPatchCreator
                     continue;
                 }
 
-                if (InvokeHDiffz(fromPath.FullName, toPath.FullName, diffPath.FullName))
+                if (await InvokeHDiffz(fromPath.FullName, toPath.FullName, diffPath.FullName))
                 {
                     if (diffPath.Length >= toPath.Length)
                     {
@@ -273,26 +274,30 @@ namespace HDiffPatchCreator
             #endregion
 
             #region Create Compressed File
-            var proc7z = Process.Start(path7z,
-                $"a -tzip \"{createpakPath}\" \"{tmpFilePath}\\*\" -mmt");
-            proc7z.WaitForExit();
+            await OuterInvoke.Run(new OuterInvokeInfo
+            {
+                ProcessPath = path7z,
+                CmdLine = $"a -tzip \"{createpakPath}\" \"{tmpFilePath}\\*\" -mmt",
+                StartingNotice = "Compressing output zip archive...",
+                AutoTerminateReason = "Output compressing failed. You may retry by yourself."
+            }, 6);
             #endregion
 
             // Clear temp files
             Directory.Delete(tmpFilePath, true);
         }
 
-        static bool InvokeHDiffz(string source, string target, string outdiffpath, int retry = 5)
+        static async Task<bool> InvokeHDiffz(string source, string target, string outdiffpath, int retry = 5)
         {
             Directory.CreateDirectory(new FileInfo(outdiffpath).DirectoryName);
 
             var proc = Process.Start(hdiffzPath, $"-f \"{source}\" \"{target}\" \"{outdiffpath}\"");
-            proc.WaitForExit();
+            await proc.WaitForExitAsync();
 
             if (proc.ExitCode != 0)
             {
                 if (retry > 0)
-                    return InvokeHDiffz(source, target, outdiffpath, retry - 1);
+                    return await InvokeHDiffz(source, target, outdiffpath, retry - 1);
                 else return false;
             }
             else return true;

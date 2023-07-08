@@ -69,7 +69,7 @@ namespace HappyGenyuanImsactUpdate
                 File.Delete(hdifftxtPath);
             }
 
-            await OuterInvoke.RunMultiple(invokes, 3851);
+            await OuterInvoke.RunMultiple(invokes, 3851, 2);
 
             // Delete .hdiff afterwards
             foreach (var hdiffFile in hdiffs)

@@ -182,7 +182,7 @@ namespace HappyGenyuanImsactUpdate
                     CmdLine = $"x \"{zipfile.FullName}\" -o\"{datadir.FullName}\" -aoa -bsp1",
                     StartingNotice = "Unzip the package...",
                     AutoTerminateReason = $"7z decompress package: {zipfile.FullName} to {datadir.FullName} failed."
-                });
+                }, 3750);
 
                 Unzipped.MoveBackSubFolder(datadir, predirs);
                 #endregion

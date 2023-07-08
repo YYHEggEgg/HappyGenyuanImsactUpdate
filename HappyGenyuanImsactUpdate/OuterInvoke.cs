@@ -30,7 +30,18 @@ namespace YYHEggEgg.Utils
 
     public static class OuterInvoke
     {
-        private static async Task<int> InnerRun(OuterInvokeInfo invokeInfo)
+        private static async Task<int> MinorRun(ProcessStartInfo startInfo, int max_rerun = 0)
+        {
+            Process? p = Process.Start(startInfo);
+            await (p?.WaitForExitAsync() ?? Task.CompletedTask);
+            if (p?.ExitCode != 0 && max_rerun > 0)
+            {
+                return await MinorRun(startInfo, max_rerun - 1);
+            }
+            return p?.ExitCode ?? int.MinValue;
+        }
+
+        private static async Task<int> InnerRun(OuterInvokeInfo invokeInfo, int max_rerun = 0)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo(
                 invokeInfo.ProcessPath, invokeInfo.CmdLine ?? "")
@@ -38,9 +49,7 @@ namespace YYHEggEgg.Utils
                 WorkingDirectory = invokeInfo.WorkingDir ?? Environment.CurrentDirectory
             };
             if (invokeInfo.StartingNotice != null) Log.Info(invokeInfo.StartingNotice, nameof(OuterInvoke));
-            Process? p = Process.Start(startInfo);
-            await (p?.WaitForExitAsync() ?? Task.CompletedTask);
-            return p?.ExitCode ?? int.MinValue;
+            return await MinorRun(startInfo, max_rerun);
         }
 
         /// <summary>
@@ -48,11 +57,12 @@ namespace YYHEggEgg.Utils
         /// </summary>
         /// <param name="invokeInfo">The details of the invoke.</param>
         /// <param name="autoTerminateCode">The exut code for the program's auto terminate.</param>
+        /// <param name="max_rerun">The maximum retry times if process exited with not 0.</param>
         /// <returns>The exit code of the program.</returns>
         public static async Task<int> Run(OuterInvokeInfo invokeInfo,
-            int autoTerminateCode = -1)
+            int autoTerminateCode = -1, int max_rerun = 0)
         {
-            var exitcode = await InnerRun(invokeInfo);
+            var exitcode = await InnerRun(invokeInfo, max_rerun);
             if (exitcode != 0 && invokeInfo.AutoTerminateReason != null)
             {
                 Log.Erro($"{invokeInfo.AutoTerminateReason} Exit code is {autoTerminateCode}. ", "OuterInvoke");
@@ -69,14 +79,15 @@ namespace YYHEggEgg.Utils
         /// <param name="invokeInfo1">The details of the first invoke.</param>
         /// <param name="invokeInfo2">The details of the second invoke.</param>
         /// <param name="autoTerminateCode">The exut code for the program's auto terminate.</param>
+        /// <param name="max_rerun">The maximum retry times if process exited with not 0.</param>
         /// <returns>The exit code of the program.</returns>
         public static async Task<int[]> RunMultiple(
             OuterInvokeInfo invokeInfo1, OuterInvokeInfo invokeInfo2,
-            int autoTerminateCode = -1)
+            int autoTerminateCode = -1, int max_rerun = 0)
         {
             int[] rtn = new int[2];
-            rtn[0] = await InnerRun(invokeInfo1);
-            rtn[1] = await InnerRun(invokeInfo2);
+            rtn[0] = await InnerRun(invokeInfo1, max_rerun);
+            rtn[1] = await InnerRun(invokeInfo2, max_rerun);
 
             bool exiting = false;
             if (rtn[0] != 0 && invokeInfo1.AutoTerminateReason != null)
@@ -105,15 +116,16 @@ namespace YYHEggEgg.Utils
         /// <param name="invokeInfo2">The details of the second invoke.</param>
         /// <param name="invokeInfo3">The details of the third invoke.</param>
         /// <param name="autoTerminateCode">The exut code for the program's auto terminate.</param>
+        /// <param name="max_rerun">The maximum retry times if process exited with not 0.</param>
         /// <returns>The exit code of the program.</returns>
         public static async Task<int[]> RunMultiple(
             OuterInvokeInfo invokeInfo1, OuterInvokeInfo invokeInfo2, OuterInvokeInfo invokeInfo3,
-            int autoTerminateCode = -1)
+            int autoTerminateCode = -1, int max_rerun = 0)
         {
             int[] rtn = new int[3];
-            rtn[0] = await InnerRun(invokeInfo1);
-            rtn[1] = await InnerRun(invokeInfo2);
-            rtn[2] = await InnerRun(invokeInfo3);
+            rtn[0] = await InnerRun(invokeInfo1, max_rerun);
+            rtn[1] = await InnerRun(invokeInfo2, max_rerun);
+            rtn[2] = await InnerRun(invokeInfo3, max_rerun);
 
             bool exiting = false;
             if (rtn[0] != 0 && invokeInfo1.AutoTerminateReason != null)
@@ -145,14 +157,15 @@ namespace YYHEggEgg.Utils
         /// </summary>
         /// <param name="invokeInfos">The details of the invokes.</param>
         /// <param name="autoTerminateCode">The exut code for the program's auto terminate.</param>
+        /// <param name="max_rerun">The maximum retry times if process exited with not 0.</param>
         /// <returns>The exit code of the program.</returns>
         public static async Task<int[]> RunMultiple(OuterInvokeInfo[] invokeInfos,
-            int autoTerminateCode = -1)
+            int autoTerminateCode = -1, int max_rerun = 0)
         {
             int[] rtn = new int[invokeInfos.Length];
             for (int i = 0; i < invokeInfos.Length; i++)
             {
-                rtn[i] = await InnerRun(invokeInfos[i]);
+                rtn[i] = await InnerRun(invokeInfos[i], max_rerun);
             }
 
             bool exiting = false;
@@ -178,14 +191,15 @@ namespace YYHEggEgg.Utils
         /// </summary>
         /// <param name="invokeInfos">The details of the invokes.</param>
         /// <param name="autoTerminateCode">The exut code for the program's auto terminate.</param>
+        /// <param name="max_rerun">The maximum retry times if process exited with not 0.</param>
         /// <returns>The exit code of the program.</returns>
         public static async Task<int[]> RunMultiple(List<OuterInvokeInfo> invokeInfos,
-            int autoTerminateCode = -1)
+            int autoTerminateCode = -1, int max_rerun = 0)
         {
             int[] rtn = new int[invokeInfos.Count];
             for (int i = 0; i < invokeInfos.Count; i++)
             {
-                rtn[i] = await InnerRun(invokeInfos[i]);
+                rtn[i] = await InnerRun(invokeInfos[i], max_rerun);
             }
 
             bool exiting = false;
@@ -211,14 +225,15 @@ namespace YYHEggEgg.Utils
         /// </summary>
         /// <param name="invokeInfos">The details of the invokes.</param>
         /// <param name="autoTerminateCode">The exut code for the program's auto terminate.</param>
+        /// <param name="max_rerun">The maximum retry times if process exited with not 0.</param>
         /// <returns>The exit code of the program.</returns>
         public static int[] RunParallel(OuterInvokeInfo[] invokeInfos,
-            int autoTerminateCode = -1)
+            int autoTerminateCode = -1, int max_rerun = 0)
         {
             int[] rtn = new int[invokeInfos.Length];
             Parallel.For(0, invokeInfos.Length, async (i) =>
             {
-                rtn[i] = await InnerRun(invokeInfos[i]);
+                rtn[i] = await InnerRun(invokeInfos[i], max_rerun);
             });
 
             bool exiting = false;
@@ -244,14 +259,15 @@ namespace YYHEggEgg.Utils
         /// </summary>
         /// <param name="invokeInfos">The details of the invokes.</param>
         /// <param name="autoTerminateCode">The exut code for the program's auto terminate.</param>
+        /// <param name="max_rerun">The maximum retry times if process exited with not 0.</param>
         /// <returns>The exit code of the program.</returns>
         public static int[] RunParallel(List<OuterInvokeInfo> invokeInfos,
-            int autoTerminateCode = -1)
+            int autoTerminateCode = -1, int max_rerun = 0)
         {
             int[] rtn = new int[invokeInfos.Count];
             Parallel.For(0, invokeInfos.Count, async (i) =>
             {
-                rtn[i] = await InnerRun(invokeInfos[i]);
+                rtn[i] = await InnerRun(invokeInfos[i], max_rerun);
             });
 
             bool exiting = false;
