@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Web;
 using YYHEggEgg.Logger;
+using YYHEggEgg.Utils;
 
 namespace HappyGenyuanImsactUpdate
 {
@@ -175,9 +176,13 @@ namespace HappyGenyuanImsactUpdate
                 // Record the directories now
                 var predirs = Directory.GetDirectories(datadir.FullName);
 
-                Log.Info("Unzip the package...", "OuterInvoke");
-                var pro = Process.Start(path7z, $"x \"{zipfile.FullName}\" -o\"{datadir.FullName}\" -aoa -bsp1");
-                await pro.WaitForExitAsync();
+                await OuterInvoke.Run(new OuterInvokeInfo
+                {
+                    ProcessPath = path7z,
+                    CmdLine = $"x \"{zipfile.FullName}\" -o\"{datadir.FullName}\" -aoa -bsp1",
+                    StartingNotice = "Unzip the package...",
+                    AutoTerminateReason = $"7z decompress package: {zipfile.FullName} to {datadir.FullName} failed."
+                });
 
                 Unzipped.MoveBackSubFolder(datadir, predirs);
                 #endregion
