@@ -84,7 +84,10 @@ namespace HappyGenyuanImsactUpdate
                         var checkFile = new FileInfo(checkName);
                         string checkPathstd = checkFile.FullName;
 
-                        Log.Verb($"Checking: {checkPathstd}", nameof(CheckByPkgVersion));
+                        Log.PushLog($"Checking: {checkPathstd}", 
+                            checkAfter == CheckMode.Full ? LogLevel.Information : LogLevel.Verbose, 
+                            nameof(CheckByPkgVersion));
+                        
 
                         if (!File.Exists(checkPathstd))
                         {

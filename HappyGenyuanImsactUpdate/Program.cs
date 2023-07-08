@@ -266,9 +266,17 @@ namespace HappyGenyuanImsactUpdate
 
             Log.Info("Update process is done!");
 
-            Log.Info("Press Enter to continue.");
+            if (args.Length == 0)
+            {
+                Log.Info("Press Enter to continue.");
 
-            Console.ReadLine();
+                Console.ReadLine();
+            }
+            else
+            {
+                Log.Info("The program will exit in 3 seconds.");
+                await Task.Delay(3000);
+            }
 
             #region Multiple Read Assert
             void ReadAssert(int expected)

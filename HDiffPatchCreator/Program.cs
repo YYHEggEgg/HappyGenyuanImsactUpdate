@@ -205,7 +205,7 @@ namespace HDiffPatchCreator
             {
                 var newfile = new FileInfo($"{tmpFilePath}\\{FileCompare.GetRelativePath(file, dirTo)}");
                 Directory.CreateDirectory(newfile.DirectoryName);
-                Log.Dbug($"Copying: {file.FullName} -> {newfile.FullName}", $"{nameof(CreatePatch)}_FileCopy");
+                Log.Info($"Copying: {file.FullName} -> {newfile.FullName}", $"{nameof(CreatePatch)}_FileCopy");
                 File.Copy(file.FullName, newfile.FullName);
             }
             #endregion
@@ -240,7 +240,7 @@ namespace HDiffPatchCreator
                     if (diffPath.Length >= toPath.Length)
                     {
                         // Fallback to diff
-                        Log.Verb($"HDiff = {diffPath.Length}, To = {toPath.Length}, fallback to diff", $"{nameof(CreatePatch)}_Hdiff");
+                        Log.Info($"HDiff = {diffPath.Length}, To = {toPath.Length}, fallback to diff", $"{nameof(CreatePatch)}_Hdiff");
                         diffPath.Delete();
                         File.Copy(toPath.FullName, $"{tmpFilePath}\\{relativePath}");
                     }
@@ -291,16 +291,11 @@ namespace HDiffPatchCreator
         {
             Directory.CreateDirectory(new FileInfo(outdiffpath).DirectoryName);
 
-            var proc = Process.Start(hdiffzPath, $"-f \"{source}\" \"{target}\" \"{outdiffpath}\"");
-            await proc.WaitForExitAsync();
-
-            if (proc.ExitCode != 0)
+            return await OuterInvoke.Run(new OuterInvokeInfo
             {
-                if (retry > 0)
-                    return await InvokeHDiffz(source, target, outdiffpath, retry - 1);
-                else return false;
-            }
-            else return true;
+                ProcessPath = hdiffzPath,
+                CmdLine = $"-f \"{source}\" \"{target}\" \"{outdiffpath}\""
+            }, max_rerun: retry) == 0;
         }
 
         #region Random
