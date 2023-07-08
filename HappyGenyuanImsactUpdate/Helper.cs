@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YYHEggEgg.Logger;
 
 namespace HappyGenyuanImsactUpdate
 {
@@ -19,7 +20,7 @@ namespace HappyGenyuanImsactUpdate
             bool ok = true;
             if (!File.Exists($"{exePath}\\7z.exe"))
             {
-                Console.WriteLine("7z.exe was missing. " +
+                Log.Erro("7z.exe was missing. " +
                     "Please copy it to the path of this program " +
                     "or download the newest release in " +
                     "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/releases");
@@ -27,7 +28,7 @@ namespace HappyGenyuanImsactUpdate
             }
             if (!File.Exists($"{exePath}\\hpatchz.exe"))
             {
-                Console.WriteLine("hpatchz.exe was missing. " +
+                Log.Erro("hpatchz.exe was missing. " +
                     "Please copy it to the path of this program " +
                     "or download the newest release in " +
                     "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/releases");
@@ -37,7 +38,7 @@ namespace HappyGenyuanImsactUpdate
             {
                 if (!File.Exists($"{exePath}\\hdiffz.exe"))
                 {
-                    Console.WriteLine("hpatchz.exe was missing. " +
+                    Log.Erro("hpatchz.exe was missing. " +
                         "Please copy it to the path of this program " +
                         "or download the newest release in " +
                         "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/releases");
@@ -46,10 +47,10 @@ namespace HappyGenyuanImsactUpdate
             }
             if (!ok)
             {
-                Console.WriteLine("The program will exit after an enter. " +
+                Log.Erro("The program will exit after an enter. " +
                     "Please get missing file(s) the right location and restart.");
                 Console.ReadLine();
-                Environment.Exit(0);
+                Environment.Exit(1);
             }
         }
 
@@ -89,10 +90,8 @@ namespace HappyGenyuanImsactUpdate
             }
             catch (Exception ex)
             {
-                Console.WriteLine("----------------------------");
-                Console.WriteLine(ex);
-                Console.WriteLine($"Failed to delete program temp files. You may delete directory {_tmpdir} by yourself.");
-                Console.WriteLine("----------------------------");
+                Log.Warn($"----------------------------\n{ex}\n----------------------------", nameof(TryDisposeTempFiles));
+                Log.Warn($"Failed to delete program temp files. You may delete directory {_tmpdir} by yourself.", nameof(TryDisposeTempFiles));
             }
         }
     }

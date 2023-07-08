@@ -5,6 +5,7 @@ using Microsoft.Toolkit.Uwp.Notifications;
 using System.Diagnostics;
 using System.Numerics;
 using System.Web;
+using YYHEggEgg.Logger;
 
 namespace HappyGenyuanImsactUpdate
 {
@@ -12,7 +13,15 @@ namespace HappyGenyuanImsactUpdate
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Welcome to the update program!");
+            Log.Initialize(new LoggerConfig(
+                max_Output_Char_Count: -1,
+                use_Console_Wrapper: false,
+                use_Working_Directory: true,
+                global_Minimum_LogLevel: LogLevel.Verbose,
+                console_Minimum_LogLevel: LogLevel.Information, 
+                debug_LogWriter_AutoFlush: true));
+
+            Log.Info($"Welcome to the update program! (v{Environment.Version})");
 
             //Not working path, but the path where the program located
             Helper.CheckForTools();
@@ -36,34 +45,33 @@ namespace HappyGenyuanImsactUpdate
             #region Console Usage
             if (args.Length == 0)
             {
-                Console.WriteLine("You can also use command line like:");
-                Usage();
+                Log.Info("You can also use command line args to execute this program.", "CommandLine");
 
                 datadir = GetDataPath();
 
-                Console.WriteLine();
+                Log.Info("");
                 // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
                 checkAfter = (CheckMode)AskForCheck();
 
-                Console.WriteLine();
+                Log.Info("");
 
                 if (!PkgVersionCheck(datadir, checkAfter))
                 {
-                    Console.WriteLine("Sorry, the update process was exited because the original files aren't correct.");
-                    Console.WriteLine("The program will exit after an enter. ");
-                    Console.ReadLine();
-                    Environment.Exit(0);
+                    Log.Erro("Sorry, the update process was exited because the original files aren't correct.", nameof(PkgVersionCheck));
+                    Log.Erro("Press any key to continue. ", nameof(PkgVersionCheck));
+                    Console.Read();
+                    Environment.Exit(1);
                 }
-                else Console.WriteLine("Congratulations! Check passed!");
+                else Log.Info("Congratulations! Check passed!", nameof(PkgVersionCheck));
 
                 t = GetZipCount();
 
-                Console.WriteLine();
+                Log.Info("");
 
                 for (int i = 0; i < t; i++)
                 {
-                    Console.WriteLine();
-                    if (i > 0) Console.WriteLine("Now you should paste the path of another zip file.");
+                    Log.Info("");
+                    if (i > 0) Log.Info("Now you should paste the path of another zip file.", nameof(GetUpdatePakPath));
                     zips.Add(GetUpdatePakPath(datadir.FullName));
                 }
             }
@@ -166,7 +174,7 @@ namespace HappyGenyuanImsactUpdate
                 // Record the directories now
                 var predirs = Directory.GetDirectories(datadir.FullName);
 
-                Console.WriteLine("Unzip the package...");
+                Log.Info("Unzip the package...", "OuterInvoke");
                 var pro = Process.Start(path7z, $"x \"{zipfile.FullName}\" -o\"{datadir.FullName}\" -aoa -bsp1");
                 await pro.WaitForExitAsync();
 
@@ -176,8 +184,7 @@ namespace HappyGenyuanImsactUpdate
                 await patch.Hdiff();
                 delete_delays.AddRange(patch.DeleteFiles());
 
-                Console.WriteLine();
-                Console.WriteLine();
+                Log.Info("\n\n");
             }
 
             // For some reasons, the package check is delayed to the end.
@@ -195,12 +202,12 @@ namespace HappyGenyuanImsactUpdate
                         .Show();
                 }
 
-                Console.WriteLine("Sorry, the update process was exited because files aren't correct.");
-                Console.WriteLine("The program will exit after an enter. ");
-                Console.ReadLine();
-                Environment.Exit(0);
+                Log.Erro("Sorry, the update process was exited because the original files aren't correct.", nameof(PkgVersionCheck));
+                Log.Erro("Press any key to continue. ", nameof(PkgVersionCheck));
+                Console.Read();
+                Environment.Exit(1);
             }
-            else Console.WriteLine("Congratulations! Check passed!");
+            else Log.Info("Congratulations! Check passed!", nameof(PkgVersionCheck));
 
             foreach (var pkgversionpath in pkgversionpaths)
             {
@@ -212,37 +219,23 @@ namespace HappyGenyuanImsactUpdate
                 File.Move(backuppath, pkgversionpath);
                 if (checkAfter == CheckMode.None)
                 {
-                    Console.WriteLine($"WARNING: {pkgver.Name} hasn't checked and may not fit the current version.");
+                    Log.Warn($"{pkgver.Name} hasn't checked and may not fit the current version.");
                     continue;
                 }
 
-                var checkres = UpCheck.CheckByPkgVersion(datadir, pkgversionpath, checkAfter,
-                    str =>
-                    {
-                        Console.WriteLine(str);
-                        if (!str.StartsWith("ERROR"))
-                        {
-                            // Clear the content in Console
-                            ClearWrittenLine(str);
-                        }
-                    });
+                var checkres = UpCheck.CheckByPkgVersion(datadir, pkgversionpath, checkAfter);
 
                 if (!checkres)
                 {
-                    Console.WriteLine($"WARNING: {pkgver.Name} isn't fit with current version any more. You may fix the error or remove the file under the game data directory.");
+                    Log.Warn($"{pkgver.Name} isn't fit with current version any more. You may fix the error or remove the file under the game data directory.");
                 }
             }
 
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("---------------------------");
-            Console.WriteLine();
-            Console.WriteLine();
+            Log.Info("\n\n\n\n\n---------------------\n\n\n\n\n");
 
             // Change the config.ini of official launcher
             if ((usingcommandline && ifconfigchange) || !usingcommandline)
                 ConfigChange(datadir, zips[0], zips[zips.Count - 1]);
-            Console.WriteLine();
 
             // Handling with delayed deletions
             foreach (var deletedfile in delete_delays)
@@ -260,14 +253,14 @@ namespace HappyGenyuanImsactUpdate
                     .Show();
             }
 
-            DeleteZipFiles(zips, ifdeletepackage);
-            Console.WriteLine();
+            DeleteZipFilesReq(zips, ifdeletepackage);
+            Log.Info("-------------------------");
 
             Helper.TryDisposeTempFiles();
 
-            Console.WriteLine("Update process is done!");
+            Log.Info("Update process is done!");
 
-            Console.WriteLine("Press Enter to continue.");
+            Log.Info("Press Enter to continue.");
 
             Console.ReadLine();
 
@@ -276,7 +269,8 @@ namespace HappyGenyuanImsactUpdate
             {
                 if (arghaveread[expected])
                 {
-                    Console.WriteLine("Duplicated param!");
+                    Log.Info("Duplicated param!");
+                    Usage();
                     Environment.Exit(1);
                 }
                 arghaveread[expected] = true;
@@ -286,15 +280,16 @@ namespace HappyGenyuanImsactUpdate
 
         private static void Usage()
         {
-            Console.WriteLine("happygenyuanimsactupdate \r\n" +
-                "-patchAt <game_directory> \r\n" +
-                "-checkmode <0/1/2> (0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5))\r\n" +
-                "-zip_count <count> <zipPath1...n> \r\n" +
-                "[--config_change_guidance <true/false>] (change the showing version of official launcher, default is true)\r\n" +
+            Log.Info("CommandLine usage: \n" +
+                "happygenyuanimsactupdate \n" +
+                "-patchAt <game_directory> \n" +
+                "-checkmode <0/1/2> (0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5))\n" +
+                "-zip_count <count> <zipPath1...n> \n" +
+                "[--config_change_guidance <true/false>] (change the showing version of official launcher, default is true)\n" +
                 "[--delete_update_packages] (delete update packages, won't delete if the param isn't given)" +
-                "\r\n\r\n" +
+                "\n\n" +
                 "e.g. happygenyuanimsactupdate -patchAt \"D:\\Game\" -checkmode 1 -zip_count 2 \"game_1_hdiff.zip\" \"zh-cn_hdiff.zip\" " +
-                "--config_change_guidance false\r\n");
+                "--config_change_guidance false\n", "CommandLine");
         }
 
         #region Change config for official launcher
@@ -319,8 +314,8 @@ namespace HappyGenyuanImsactUpdate
                     .Show();
             }
 
-            Console.WriteLine("We have noticed that you're probably using an official launcher.");
-            Console.WriteLine("To make it display the correct version, we would make some change on related file.");
+            Log.Info("We have noticed that you're probably using an official launcher.", nameof(ConfigChange));
+            Log.Info("To make it display the correct version, we would make some change on related file.", nameof(ConfigChange));
 
             string verstart = ConfigIni.FindStartVersion(zipstart.Name);
             string verto = ConfigIni.FindToVersion(zipend.Name);
@@ -329,7 +324,7 @@ namespace HappyGenyuanImsactUpdate
 
             if (verstart == string.Empty || verto == string.Empty)
             {
-                Console.WriteLine("We can't infer the version you're updating to.");
+                Log.Warn("We can't infer the version you're updating to.", nameof(ConfigChange));
                 CustomChangeVersion(configfile);
             }
             else
@@ -346,14 +341,14 @@ namespace HappyGenyuanImsactUpdate
         /// <param name="verto">the update version</param>
         public static void GetConfigUpdateOptions(FileInfo configfile, string verstart, string verto)
         {
-            Console.WriteLine($"We infer that you're updating from {verstart} to {verto} .");
-            Console.WriteLine("Is it true? Type 'y' to apply the change " +
-                "or type the correct version you're updating to.");
-            Console.WriteLine("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.");
+            Log.Info($"We infer that you're updating from {verstart} to {verto} .", nameof(ConfigChange));
+            Log.Info("Is it true? Type 'y' to apply the change " +
+                "or type the correct version you're updating to.", nameof(ConfigChange));
+            Log.Info("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.", nameof(ConfigChange));
             string? s = Console.ReadLine();
             if (s == null || s == string.Empty)
             {
-                Console.WriteLine("Invaild version!");
+                Log.Warn("Invaild version!", nameof(ConfigChange));
                 CustomChangeVersion(configfile);
             }
             else if (s.ToLower() == "y")
@@ -363,7 +358,7 @@ namespace HappyGenyuanImsactUpdate
                 ConfigIni.ApplyConfigChange(configfile, s);
             else
             {
-                Console.WriteLine("Invaild version!");
+                Log.Warn("Invaild version!", nameof(ConfigChange));
                 CustomChangeVersion(configfile);
             }
         }
@@ -374,13 +369,13 @@ namespace HappyGenyuanImsactUpdate
         /// <param name="configfile">config.ini</param>
         public static void CustomChangeVersion(FileInfo configfile)
         {
-            Console.WriteLine("Please type the version you're updating to, and we'll apply the change:");
-            Console.WriteLine("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.");
+            Log.Info("Please type the version you're updating to, and we'll apply the change:", nameof(CustomChangeVersion));
+            Log.Info("If you don't use a launcher or don't want to change the display version, type 'n' to refuse it.", nameof(CustomChangeVersion));
 
             string? s = Console.ReadLine();
             if (s == null || s == string.Empty)
             {
-                Console.WriteLine("Invaild version!");
+                Log.Warn("Invaild version!", nameof(CustomChangeVersion));
                 CustomChangeVersion(configfile);
             }
             else if (s.ToLower() == "n") return;
@@ -388,7 +383,7 @@ namespace HappyGenyuanImsactUpdate
                 ConfigIni.ApplyConfigChange(configfile, s);
             else
             {
-                Console.WriteLine("Invaild version!");
+                Log.Warn("Invaild version!", nameof(CustomChangeVersion));
                 CustomChangeVersion(configfile);
             }
         }
@@ -397,34 +392,24 @@ namespace HappyGenyuanImsactUpdate
         #region Package Verify
         public static bool UpdateCheck(DirectoryInfo datadir, CheckMode checkAfter)
         {
-            Console.WriteLine("Start verifying...");
-            Console.WriteLine();
+            Log.Info("Start verifying...\n", nameof(UpdateCheck));
 
             if (checkAfter == CheckMode.None)
             {
-                Console.WriteLine("Due to user's demanding, no checks are performed.");
+                Log.Info("Due to user's demanding, no checks are performed.", nameof(UpdateCheck));
                 return true;
             }
 
             var pkgversionPaths = UpCheck.GetPkgVersion(datadir);
             if (pkgversionPaths == null || pkgversionPaths.Count == 0)
             {
-                Console.WriteLine("Can't find version file. No checks are performed.");
-                Console.WriteLine("If you can find it, please tell to us: " +
-                    "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues");
+                Log.Info("Can't find version file. No checks are performed.", nameof(UpdateCheck));
+                Log.Info("If you can find it, please tell to us: " +
+                    "https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues", nameof(UpdateCheck));
                 return true;
             }
 
-            return UpCheck.CheckByPkgVersion(datadir, pkgversionPaths, checkAfter,
-                str =>
-                {
-                    Console.WriteLine(str);
-                    if (!str.StartsWith("ERROR"))
-                    {
-                        // Clear the content in Console
-                        ClearWrittenLine(str);
-                    }
-                });
+            return UpCheck.CheckByPkgVersion(datadir, pkgversionPaths, checkAfter);
         }
 
         #region Clear the Written Content in Console
@@ -443,8 +428,8 @@ namespace HappyGenyuanImsactUpdate
 
         private static void ClearWrittenLine(string wstr)
         {
-            int times = (int)Math.Ceiling((decimal)wstr.Length / Console.WindowWidth);
-            while (times-- > 0) ClearSingleLine();
+            // int times = (int)Math.Ceiling((decimal)wstr.Length / Console.WindowWidth);
+            // while (times-- > 0) ClearSingleLine();
         }
         #endregion
 
@@ -453,7 +438,7 @@ namespace HappyGenyuanImsactUpdate
         {
             if (checkAfter == CheckMode.None)
             {
-                Console.WriteLine("No checks are performed.");
+                Log.Info("No checks are performed.", nameof(PkgVersionCheck));
                 return true;
             }
 
@@ -483,12 +468,12 @@ namespace HappyGenyuanImsactUpdate
         //The same goes for the following methods. 
         static DirectoryInfo GetDataPath()
         {
-            Console.WriteLine("Paste the full path of game directory here. " +
-                "It's usually ended with \"Genyuan Imsact game\".");
+            Log.Info("Paste the full path of game directory here. " +
+                "It's usually ended with \"Genyuan Imsact game\".", nameof(GetDataPath));
             string? dataPath = RemoveDoubleQuotes(Console.ReadLine());
             if (dataPath == null || dataPath == string.Empty)
             {
-                Console.WriteLine("Invaild game path!");
+                Log.Warn("Invaild game path!", nameof(GetDataPath));
                 return GetDataPath();
             }
 
@@ -496,7 +481,7 @@ namespace HappyGenyuanImsactUpdate
             if (!File.Exists($"{datadir}\\{Helper.certaingame1}.exe")
                 && !File.Exists($"{datadir}\\{Helper.certaingame2}.exe"))
             {
-                Console.WriteLine("Invaild game path!");
+                Log.Warn("Invaild game path!", nameof(GetDataPath));
                 return GetDataPath();
             }
             else return datadir;
@@ -504,13 +489,13 @@ namespace HappyGenyuanImsactUpdate
 
         static FileInfo GetUpdatePakPath(string gamePath)
         {
-            Console.WriteLine("Paste the full path of update package here. " +
-                "It should be a zip file.");
-            Console.WriteLine("If it's under the game directory, you can just paste the name of zip file here.");
+            Log.Info("Paste the full path of update package here. " +
+                "It should be a zip file.", nameof(GetUpdatePakPath));
+            Log.Info("If it's under the game directory, you can just paste the name of zip file here.", nameof(GetUpdatePakPath));
             string? pakPath = RemoveDoubleQuotes(Console.ReadLine());
             if (pakPath == null || pakPath == string.Empty)
             {
-                Console.WriteLine("Invaild update package!");
+                Log.Warn("Invaild update package!", nameof(GetUpdatePakPath));
                 return GetUpdatePakPath(gamePath);
             }
 
@@ -536,7 +521,7 @@ namespace HappyGenyuanImsactUpdate
 
             if (!zipfile.Exists)
             {
-                Console.WriteLine("Invaild update package!");
+                Log.Warn("Invaild update package!", nameof(GetUpdatePakPath));
                 return GetUpdatePakPath(gamePath);
             }
 
@@ -546,10 +531,10 @@ namespace HappyGenyuanImsactUpdate
         static int GetZipCount()
         {
             int rtn = 0;
-            Console.WriteLine("Please type the count of zip file you have.");
+            Log.Info("Please type the count of zip file you have.", nameof(GetUpdatePakPath));
             if (!int.TryParse(Console.ReadLine(), out rtn))
             {
-                Console.WriteLine("Invaild input!");
+                Log.Warn("Invaild input!", nameof(GetUpdatePakPath));
                 return GetZipCount();
             }
             else return rtn;
@@ -558,19 +543,19 @@ namespace HappyGenyuanImsactUpdate
         // 0 -> none, 1 -> basic check (file size), 2 -> full check (size + md5)
         static int AskForCheck()
         {
-            Console.WriteLine("Do you want to have a check after updating?");
-            Console.WriteLine("If you don't want any check, type 0;");
-            Console.WriteLine("For a fast check (recommended, only compares file size, usually < 10s), type 1;");
-            Console.WriteLine("For a full check (scans files, takes a long time, usually > 5 minutes), type 2.");
+            Log.Info("Do you want to have a check after updating?", nameof(AskForCheck));
+            Log.Info("If you don't want any check, type 0;", nameof(AskForCheck));
+            Log.Info("For a fast check (recommended, only compares file size, usually < 10s), type 1;", nameof(AskForCheck));
+            Log.Info("For a full check (scans files, takes a long time, usually > 5 minutes), type 2.", nameof(AskForCheck));
             int rtn = 0;
             if (!int.TryParse(Console.ReadLine(), out rtn))
             {
-                Console.WriteLine("Invaild input!");
+                Log.Warn("Invaild input!", nameof(AskForCheck));
                 return AskForCheck();
             }
             else if (rtn < 0 || rtn > 2)
             {
-                Console.WriteLine("Invaild input!");
+                Log.Warn("Invaild input!", nameof(AskForCheck));
                 return AskForCheck();
             }
             else return rtn;
@@ -579,17 +564,17 @@ namespace HappyGenyuanImsactUpdate
 
         #region Delete Update Zip File
         /// <param name="delete">true=delete; false=reserve; null=not given, ask the user</param>
-        static void DeleteZipFiles(List<FileInfo> zips, bool? delete = null)
+        static void DeleteZipFilesReq(List<FileInfo> zips, bool? delete = null)
         {
             if (delete == null)
             {
-                Console.WriteLine("The pre-download packages aren't needed any more.");
-                Console.WriteLine("Do you want to delete them? Type 'y' to accept or 'n' to refuse.");
+                Log.Info("The pre-download packages aren't needed any more.", nameof(DeleteZipFilesReq));
+                Log.Info("Do you want to delete them? Type 'y' to accept or 'n' to refuse.", nameof(DeleteZipFilesReq));
                 string? s = Console.ReadLine();
                 if (s == null)
                 {
-                    Console.WriteLine("Invaild input!");
-                    DeleteZipFiles(zips);
+                    Log.Warn("Invaild input!", nameof(DeleteZipFilesReq));
+                    DeleteZipFilesReq(zips);
                     return;
                 }
                 else if (s.ToLower() == "y")
@@ -605,8 +590,8 @@ namespace HappyGenyuanImsactUpdate
                 }
                 else
                 {
-                    Console.WriteLine("Invaild input!");
-                    DeleteZipFiles(zips);
+                    Log.Warn("Invaild input!", nameof(DeleteZipFilesReq));
+                    DeleteZipFilesReq(zips);
                     return;
                 }
             }
