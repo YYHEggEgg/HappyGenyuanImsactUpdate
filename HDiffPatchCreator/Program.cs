@@ -17,7 +17,7 @@ namespace HDiffPatchCreator
             Log.Initialize(new LoggerConfig(
                 max_Output_Char_Count: -1,
                 use_Console_Wrapper: false,
-                use_Working_Directory: true,
+                use_Working_Directory: false,
                 global_Minimum_LogLevel: LogLevel.Verbose,
                 console_Minimum_LogLevel: LogLevel.Information,
                 debug_LogWriter_AutoFlush: true));

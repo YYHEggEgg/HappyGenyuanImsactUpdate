@@ -17,7 +17,7 @@ namespace HappyGenyuanImsactUpdate
             Log.Initialize(new LoggerConfig(
                 max_Output_Char_Count: -1,
                 use_Console_Wrapper: false,
-                use_Working_Directory: true,
+                use_Working_Directory: false,
                 global_Minimum_LogLevel: LogLevel.Verbose,
                 console_Minimum_LogLevel: LogLevel.Information, 
                 debug_LogWriter_AutoFlush: true));
@@ -425,27 +425,6 @@ namespace HappyGenyuanImsactUpdate
 
             return UpCheck.CheckByPkgVersion(datadir, pkgversionPaths, checkAfter);
         }
-
-        #region Clear the Written Content in Console
-        // Reference:
-        // [ Can Console.Clear be used to only clear a line instead of whole console? ]
-        // https://stackoverflow.com/questions/8946808/can-console-clear-be-used-to-only-clear-a-line-instead-of-whole-console
-
-        private static void ClearSingleLine()
-        {
-            Console.SetCursorPosition(0, Console.CursorTop - 1);
-            int currentLineCursor = Console.CursorTop;
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, currentLineCursor);
-        }
-
-        private static void ClearWrittenLine(string wstr)
-        {
-            // int times = (int)Math.Ceiling((decimal)wstr.Length / Console.WindowWidth);
-            // while (times-- > 0) ClearSingleLine();
-        }
-        #endregion
 
         // Check if pkg_version and Audio_pkg_version can match the real condition
         static bool PkgVersionCheck(DirectoryInfo datadir, CheckMode checkAfter)
