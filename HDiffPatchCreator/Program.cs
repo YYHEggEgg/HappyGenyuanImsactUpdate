@@ -86,7 +86,6 @@ namespace HDiffPatchCreator
             else
             {
                 Usage();
-                Console.ReadLine();
                 return;
             }
             #endregion
@@ -94,8 +93,9 @@ namespace HDiffPatchCreator
             #region Input Assert
             if (dirFrom == null || dirTo == null || outputAt == null)
             {
+                Log.Erro("Input param lack!");
                 Usage();
-                throw new ArgumentException("Input param lack!");
+                Environment.Exit(1);
             }
             if (!File.Exists($"{dirFrom}\\{Helper.certaingame1}.exe")
                 && !File.Exists($"{dirFrom}\\{Helper.certaingame2}.exe"))
