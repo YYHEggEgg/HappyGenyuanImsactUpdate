@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using YYHEggEgg.Logger;
 
 namespace HappyGenyuanImsactUpdate
 {
@@ -29,8 +30,8 @@ namespace HappyGenyuanImsactUpdate
                 if (file.Name.StartsWith("Audio_") && file.Name.EndsWith("_pkg_version"))
                 {
 #if DEBUG
-                    Console.WriteLine(
-                        $"The lauguage of this audio package is {file.Name.Substring(6, file.Name.Length - 18)}.");
+                    Log.Info(
+                        $"The lauguage of this audio package is {file.Name.Substring(6, file.Name.Length - 18)}.", nameof(GetPkgVersion));
 #endif                        
                     rtns.Add(file.FullName);
                 }
@@ -41,7 +42,7 @@ namespace HappyGenyuanImsactUpdate
 
         #region Package Check
         public static bool CheckByPkgVersion(DirectoryInfo datadir, List<string> pkgversionPaths,
-            CheckMode checkAfter, Action<string> log)
+            CheckMode checkAfter)
         {
             if (checkAfter == CheckMode.None) return true;
 
@@ -49,14 +50,14 @@ namespace HappyGenyuanImsactUpdate
 
             foreach (var pkgversionPath in pkgversionPaths)
             {
-                checkPassed = checkPassed && CheckByPkgVersion(datadir, pkgversionPath, checkAfter, log);
+                checkPassed = checkPassed && CheckByPkgVersion(datadir, pkgversionPath, checkAfter);
             }
 
             return checkPassed;
         }
 
         public static bool CheckByPkgVersion(DirectoryInfo datadir, string pkgversionPath,
-            CheckMode checkAfter, Action<string> log)
+            CheckMode checkAfter)
         {
             if (checkAfter == CheckMode.None) return true;
 
@@ -83,11 +84,14 @@ namespace HappyGenyuanImsactUpdate
                         var checkFile = new FileInfo(checkName);
                         string checkPathstd = checkFile.FullName;
 
-                        log($"Checking: {checkPathstd}");
+                        Log.PushLog($"Checking: {checkPathstd}", 
+                            checkAfter == CheckMode.Full ? LogLevel.Information : LogLevel.Verbose, 
+                            nameof(CheckByPkgVersion));
+                        
 
                         if (!File.Exists(checkPathstd))
                         {
-                            log(ReportFileError(checkPathstd, "The file does not exist"));
+                            Log.Warn(ReportFileError(checkPathstd, "The file does not exist"), nameof(CheckByPkgVersion));
                             checkPassed = false;
                             continue;
                         }
@@ -98,7 +102,7 @@ namespace HappyGenyuanImsactUpdate
                         long sizeExpected = doce.GetProperty("fileSize").GetInt64();
                         if (checkFile.Length != sizeExpected)
                         {
-                            log(ReportFileError(checkPathstd, "The file is not correct"));
+                            Log.Warn(ReportFileError(checkPathstd, "The file is not correct"), nameof(CheckByPkgVersion));
                             checkPassed = false;
                             continue;
                         }
@@ -110,7 +114,7 @@ namespace HappyGenyuanImsactUpdate
                             string md5Expected = doce.GetProperty("md5").GetString();
                             if (MyMD5.GetMD5HashFromFile(checkPathstd) != md5Expected)
                             {
-                                log(ReportFileError(checkPathstd, "The file is not correct"));
+                                Log.Warn(ReportFileError(checkPathstd, "The file is not correct"), nameof(CheckByPkgVersion));
                                 checkPassed = false;
                                 continue;
                             }
@@ -131,7 +135,7 @@ namespace HappyGenyuanImsactUpdate
 
         private static string ReportFileError(string checkPathstd, string reason)
         {
-            return $"ERROR: {reason} : {checkPathstd}";
+            return $"{reason} : {checkPathstd}";
         }
         #endregion
     }

@@ -13,6 +13,12 @@ This won't be fixed as I don't want to pollute the code any more.
 This is most probably a temporaily a corner case and **this Updater program is still avaliable in >=3.7 versions**. For more information, go to [this issue](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15).
 
 ## New feature
+### v3.2.0
+- Migrated the entire project to `EggEgg.CSharp-Logger v3.0.0`.
+  Now, whether updating or creating update packages, the logs will be kept in the program directory, but the debug logs will not be displayed on the console and will be output to `latest.debug.log`.
+- During updates, hdiff patch failure is supported for automatic retries (3 times).
+- A warning will be triggered if the program is run without extracting it.
+
 ### v3.1.0
 #### Updater
 Have some bugfix about pkg_version reserve and verify. 
@@ -43,7 +49,7 @@ Next, it will ask you to choose how to check the files after update:
 - 2 - Full check on MD5 (the speed depends on your disk, it will take a long time if the data isn't on a fast-speed drive like SSD)
 
 Then, you need to type how many zip files you have.     
-After that, you just need to paste all paths of zip files at a time, then the update program will finish the update process automatically.
+After that, you just need to drag zip files one by one (press enter after dragging in), then the update program will finish the update process automatically.
 
 Enjoy it!
 

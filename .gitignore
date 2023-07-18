@@ -1,8 +1,9 @@
 /.vs
 /Release-windows10-x64
-/HappyGenyuanImsactUpdate/HappyGenyuanImsactUpdate/bin
-/HappyGenyuanImsactUpdate/HappyGenyuanImsactUpdate/obj
-/HappyGenyuanImsactUpdate/HappyGenyuanImsactUpdate/Properties
-/HappyGenyuanImsactUpdate/HDiffPatchCreator/bin
-/HappyGenyuanImsactUpdate/HDiffPatchCreator/obj
-/HappyGenyuanImsactUpdate/HDiffPatchCreator/Properties
+/HappyGenyuanImsactUpdate/bin
+/HappyGenyuanImsactUpdate/obj
+/HappyGenyuanImsactUpdate/Properties
+/HDiffPatchCreator/bin
+/HDiffPatchCreator/obj
+/HDiffPatchCreator/Properties
+/.vscode

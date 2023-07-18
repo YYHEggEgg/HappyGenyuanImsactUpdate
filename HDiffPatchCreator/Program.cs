@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Text;
 using System.Web;
+using YYHEggEgg.Logger;
+using YYHEggEgg.Utils;
 
 namespace HDiffPatchCreator
 {
@@ -10,13 +12,22 @@ namespace HDiffPatchCreator
         static string path7z = $"{Helper.exePath}\\7z.exe";
         static string hdiffzPath = $"{Helper.exePath}\\hdiffz.exe";
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            Console.WriteLine("----------Happy hdiff creator----------");
+            Log.Initialize(new LoggerConfig(
+                max_Output_Char_Count: -1,
+                use_Console_Wrapper: false,
+                use_Working_Directory: false,
+                global_Minimum_LogLevel: LogLevel.Verbose,
+                console_Minimum_LogLevel: LogLevel.Information,
+                debug_LogWriter_AutoFlush: true));
+
+            Log.Info("----------Happy hdiff creator----------");
+            Helper.CheckForRunningInZipFile();
 
             Helper.CheckForTools();
 
-            Console.WriteLine("This program is used to create Patch from two versions of a certain anime game.");
+            Log.Info("This program is used to create Patch from two versions of a certain anime game.");
 
             string verFrom = "Unknown", verTo = "Unknown", prefix = "game";
             DirectoryInfo? dirFrom = null, dirTo = null, outputAt = null;
@@ -75,7 +86,6 @@ namespace HDiffPatchCreator
             else
             {
                 Usage();
-                Console.ReadLine();
                 return;
             }
             #endregion
@@ -83,19 +93,20 @@ namespace HDiffPatchCreator
             #region Input Assert
             if (dirFrom == null || dirTo == null || outputAt == null)
             {
+                Log.Erro("Input param lack!");
                 Usage();
-                throw new ArgumentException("Input param lack!");
+                Environment.Exit(1);
             }
             if (!File.Exists($"{dirFrom}\\{Helper.certaingame1}.exe")
                 && !File.Exists($"{dirFrom}\\{Helper.certaingame2}.exe"))
             {
-                Console.WriteLine("Invaild game path! (verFrom)");
+                Log.Erro("Invaild game path! (verFrom)", "InputAssert");
                 Environment.Exit(1);
             }
             if (!File.Exists($"{dirTo}\\{Helper.certaingame1}.exe")
                 && !File.Exists($"{dirTo}\\{Helper.certaingame2}.exe"))
             {
-                Console.WriteLine("Invaild game path! (verTo)");
+                Log.Erro("Invaild game path! (verTo)", "InputAssert");
                 Environment.Exit(1);
             }
             #endregion
@@ -105,7 +116,7 @@ namespace HDiffPatchCreator
                 if (!HappyGenyuanImsactUpdate.Program.UpdateCheck(dirFrom, CheckMode.Basic)
                     || !HappyGenyuanImsactUpdate.Program.UpdateCheck(dirTo, CheckMode.Basic))
                 {
-                    Console.WriteLine("Original files not correct. Not supported in current version.");
+                    Log.Erro("Original files not correct. Not supported in current version.");
                     Environment.Exit(1);
                 }
             }
@@ -126,16 +137,16 @@ namespace HDiffPatchCreator
 
             if (areIdentical == true)
             {
-                Console.WriteLine("The two folders are the same!");
+                Log.Warn("The two folders are the same!");
             }
             #endregion
 
-            CreatePatch(list1, list2, dirFrom, dirTo,
+            await CreatePatch(list1, list2, dirFrom, dirTo,
                 $"{outputAt}\\{prefix}_{verFrom}_{verTo}_hdiff_{Randomstr(16)}.zip", cmp);
 
             if (createReverse)
             {
-                CreatePatch(list2, list1, dirTo, dirFrom,
+                await CreatePatch(list2, list1, dirTo, dirFrom,
                     $"{outputAt}\\{prefix}_{verTo}_{verFrom}_hdiff_{Randomstr(16)}.zip", cmp);
             }
 
@@ -144,7 +155,8 @@ namespace HDiffPatchCreator
             {
                 if (arghaveread[expected])
                 {
-                    Console.WriteLine("Duplicated param!");
+                    Log.Erro("Duplicated param!");
+                    Usage();
                     Environment.Exit(1);
                 }
                 arghaveread[expected] = true;
@@ -154,22 +166,22 @@ namespace HDiffPatchCreator
 
         static void Usage()
         {
-            Console.WriteLine("Usage: hdiffpatchcreator");
-            Console.WriteLine("  -from <versionFrom> <source_directory>");
-            Console.WriteLine("  -to <versionTo> <target_directory>");
-            Console.WriteLine("  -output_to <output_zip_directory>");
-            Console.WriteLine("  [-p <prefix>] [-reverse] [--skip-check]");
-            Console.WriteLine();
-            Console.WriteLine("By using this program, you can get a package named: ");
-            Console.WriteLine("[prefix]_<versionFrom>_<versionTo>_hdiff_<randomstr>.zip");
-            Console.WriteLine("e.g. game_3.4_8.0_hdiff_nj89iGjh4d.zip");
-            Console.WriteLine("If not given, prefix will be 'game'.");
-            Console.WriteLine();
-            Console.WriteLine("Notice: For the patch creator, MD5 computing when comparing files is essential.");
-            Console.WriteLine("You can't choose not to use it.");
+            Log.Info("Usage: hdiffpatchcreator", "CommandLine");
+            Log.Info("  -from <versionFrom> <source_directory>", "CommandLine");
+            Log.Info("  -to <versionTo> <target_directory>", "CommandLine");
+            Log.Info("  -output_to <output_zip_directory>", "CommandLine");
+            Log.Info("  [-p <prefix>] [-reverse] [--skip-check]", "CommandLine");
+            Log.Info("", "CommandLine");
+            Log.Info("By using this program, you can get a package named: ", "CommandLine");
+            Log.Info("[prefix]_<versionFrom>_<versionTo>_hdiff_<randomstr>.zip", "CommandLine");
+            Log.Info("e.g. game_3.4_8.0_hdiff_nj89iGjh4d.zip", "CommandLine");
+            Log.Info("If not given, prefix will be 'game'.", "CommandLine");
+            Log.Info("", "CommandLine");
+            Log.Info("Notice: For the patch creator, MD5 computing when comparing files is essential.", "CommandLine");
+            Log.Info("You can't choose not to use it.", "CommandLine");
         }
 
-        static void CreatePatch(IEnumerable<FileInfo> filesFrom, IEnumerable<FileInfo> filesTo,
+        static async Task CreatePatch(IEnumerable<FileInfo> filesFrom, IEnumerable<FileInfo> filesTo,
             DirectoryInfo dirFrom, DirectoryInfo dirTo, string createpakPath, FileCompare cmp)
         {
             var tmpFilePath = $"{new FileInfo(createpakPath).DirectoryName}\\Temp-{Randomstr(32)}";
@@ -193,7 +205,7 @@ namespace HDiffPatchCreator
             {
                 var newfile = new FileInfo($"{tmpFilePath}\\{FileCompare.GetRelativePath(file, dirTo)}");
                 Directory.CreateDirectory(newfile.DirectoryName);
-                Console.WriteLine($"Copying: {file.FullName} -> {newfile.FullName}");
+                Log.Info($"Copying: {file.FullName} -> {newfile.FullName}", $"{nameof(CreatePatch)}_FileCopy");
                 File.Copy(file.FullName, newfile.FullName);
             }
             #endregion
@@ -212,7 +224,7 @@ namespace HDiffPatchCreator
 
                 if (cmp.RealEqual(fromPath, toPath))
                 {
-                    Console.WriteLine($"Skip: {fromPath.FullName} == {toPath.FullName}");
+                    Log.Verb($"Skip: {fromPath.FullName} == {toPath.FullName}", $"{nameof(CreatePatch)}_Hdiff");
                     continue;
                 }
 
@@ -223,12 +235,12 @@ namespace HDiffPatchCreator
                     continue;
                 }
 
-                if (InvokeHDiffz(fromPath.FullName, toPath.FullName, diffPath.FullName))
+                if (await InvokeHDiffz(fromPath.FullName, toPath.FullName, diffPath.FullName))
                 {
                     if (diffPath.Length >= toPath.Length)
                     {
                         // Fallback to diff
-                        Console.WriteLine($"HDiff = {diffPath.Length}, To = {toPath.Length}, fallback to diff");
+                        Log.Info($"HDiff = {diffPath.Length}, To = {toPath.Length}, fallback to diff", $"{nameof(CreatePatch)}_Hdiff");
                         diffPath.Delete();
                         File.Copy(toPath.FullName, $"{tmpFilePath}\\{relativePath}");
                     }
@@ -240,7 +252,7 @@ namespace HDiffPatchCreator
                 }
                 else
                 {
-                    Console.WriteLine($"HDiff failed, fallback to diff");
+                    Log.Warn($"HDiff failed, fallback to diff, file fromVer: {fromPath.FullName}, toVer: {toPath.FullName}", $"{nameof(CreatePatch)}_Hdiff");
                     Directory.CreateDirectory(diffPath.DirectoryName);
                     Debug.Assert(false);
                     File.Copy(toPath.FullName, $"{tmpFilePath}\\{relativePath}");
@@ -262,29 +274,28 @@ namespace HDiffPatchCreator
             #endregion
 
             #region Create Compressed File
-            var proc7z = Process.Start(path7z,
-                $"a -tzip \"{createpakPath}\" \"{tmpFilePath}\\*\" -mmt");
-            proc7z.WaitForExit();
+            await OuterInvoke.Run(new OuterInvokeInfo
+            {
+                ProcessPath = path7z,
+                CmdLine = $"a -tzip \"{createpakPath}\" \"{tmpFilePath}\\*\" -mmt",
+                StartingNotice = "Compressing output zip archive...",
+                AutoTerminateReason = "Output compressing failed. You may retry by yourself."
+            }, 6);
             #endregion
 
             // Clear temp files
             Directory.Delete(tmpFilePath, true);
         }
 
-        static bool InvokeHDiffz(string source, string target, string outdiffpath, int retry = 5)
+        static async Task<bool> InvokeHDiffz(string source, string target, string outdiffpath, int retry = 5)
         {
             Directory.CreateDirectory(new FileInfo(outdiffpath).DirectoryName);
 
-            var proc = Process.Start(hdiffzPath, $"-f \"{source}\" \"{target}\" \"{outdiffpath}\"");
-            proc.WaitForExit();
-
-            if (proc.ExitCode != 0)
+            return await OuterInvoke.Run(new OuterInvokeInfo
             {
-                if (retry > 0)
-                    return InvokeHDiffz(source, target, outdiffpath, retry - 1);
-                else return false;
-            }
-            else return true;
+                ProcessPath = hdiffzPath,
+                CmdLine = $"-f \"{source}\" \"{target}\" \"{outdiffpath}\""
+            }, max_rerun: retry) == 0;
         }
 
         #region Random
@@ -374,7 +385,7 @@ namespace HDiffPatchCreator
                 {
                     if (!_MD5memory.ContainsKey(filePath))
                     {
-                        Console.WriteLine($"Start Computing MD5 of: {filePath}");
+                        Log.Info($"Start Computing MD5 of: {filePath}");
                         _MD5memory.Add(filePath, MyMD5.GetMD5HashFromFile(filePath));
                     }
                     return _MD5memory[filePath];

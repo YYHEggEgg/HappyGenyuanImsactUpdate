@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using YYHEggEgg.Utils;
 
 namespace HappyGenyuanImsactUpdate
 {
@@ -29,6 +30,7 @@ namespace HappyGenyuanImsactUpdate
         public async Task Hdiff()
         {
             var hdiffs = new List<string>();
+            var invokes = new List<OuterInvokeInfo>();
 
             var hdifftxtPath = $"{datadir}\\hdifffiles.txt";
             if (File.Exists(hdifftxtPath))
@@ -43,7 +45,7 @@ namespace HappyGenyuanImsactUpdate
                         {
                             var doc = JsonDocument.Parse(output);
                             //{"remoteName": "name.pck"}
-                            string hdiffName = datadir.FullName + '\\'
+                            string hdiffName = datadir.FullName + '/'
                                 + doc.RootElement.GetProperty("remoteName").GetString();
                             //command:  -f (original file) (patch file)   (output file)
                             //  hpatchz -f name.pck        name.pck.hdiff name.pck
@@ -52,18 +54,22 @@ namespace HappyGenyuanImsactUpdate
                             // unnecessary files like cache and live updates,
                             // So it's essential to skip some files that doesn't exist.
                             if (!File.Exists(hdiffPathstd)) continue;
-                            var proc = Process.Start(PathHdiff,
-                                $"-f \"{hdiffName}\" \"{hdiffName}.hdiff\" \"{hdiffName}\"");
 
+                            invokes.Add(new OuterInvokeInfo
+                            {
+                                ProcessPath = PathHdiff,
+                                CmdLine = $"-f \"{hdiffName}\" \"{hdiffName}.hdiff\" \"{hdiffName}\"",
+                                AutoTerminateReason = $"hdiff patch for \"{hdiffName}\" failed."
+                            });
                             hdiffs.Add(hdiffPathstd);
-
-                            await proc.WaitForExitAsync();
                         }
                     }
                 }
 
                 File.Delete(hdifftxtPath);
             }
+
+            await OuterInvoke.RunMultiple(invokes, 3851, 2);
 
             // Delete .hdiff afterwards
             foreach (var hdiffFile in hdiffs)
