@@ -4,15 +4,20 @@
 A hdiff-using update program of a certain anime game.
 
 ## New feature
+### v3.2.1
+#### Updater
+- Fixed the issue where the Updater won't work with anime game version <= `1.5`.
+- Fixed an issue with Audio packages where the Updater won't detect them in anime game version >= `3.6`.
+- Supported packages from `Honkai: March 7th`.
+
+#### Patch Creator
+Now, when the Patch Creator detected that the given two directories have files with the same names, it will request the user for review and confirmation.
+
 ### v3.2.0
 - Migrated the entire project to `EggEgg.CSharp-Logger v3.0.0`.
   Now, whether updating or creating update packages, the logs will be kept in the program directory, but the debug logs will not be displayed on the console and will be output to `latest.debug.log`.
 - During updates, hdiff patch failure is supported for automatic retries (3 times).
 - A warning will be triggered if the program is run without extracting it.
-
-### v3.1.0
-#### Updater
-Have some bugfix about pkg_version reserve and verify. 
 
 ### v3.0.0
 Now you can create hdiff patch packages on your own, like `the anime game company`!   
