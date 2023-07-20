@@ -137,7 +137,11 @@ namespace HDiffPatchCreator
 
             if (areIdentical == true)
             {
-                Log.Warn("The two folders are the same!");
+                Log.Warn("The two folders are the same! Seem not need patch.");
+                Log.Info($"from {verFrom}: {dirFrom}");
+                Log.Info($"to {verTo}: {dirTo}");
+                Log.Warn($"Please confirm the paths are true. Press Enter to continue, or Press Ctrl+C to cancel.");
+                Console.ReadLine();
             }
             #endregion
 

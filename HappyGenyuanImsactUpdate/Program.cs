@@ -2,9 +2,6 @@
 // A hdiff-using update program of a certain anime game.
 
 using Microsoft.Toolkit.Uwp.Notifications;
-using System.Diagnostics;
-using System.Numerics;
-using System.Web;
 using YYHEggEgg.Logger;
 using YYHEggEgg.Utils;
 
@@ -19,7 +16,7 @@ namespace HappyGenyuanImsactUpdate
                 use_Console_Wrapper: false,
                 use_Working_Directory: false,
                 global_Minimum_LogLevel: LogLevel.Verbose,
-                console_Minimum_LogLevel: LogLevel.Information, 
+                console_Minimum_LogLevel: LogLevel.Information,
                 debug_LogWriter_AutoFlush: true));
 
             Log.Info($"Welcome to the update program! (v{Environment.Version})");
@@ -439,17 +436,30 @@ namespace HappyGenyuanImsactUpdate
             if (!pkgversionPaths.Contains($"{datadir}\\pkg_version")) return false;
 
             // ...\??? game\???_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows
-            string audio1 = $@"{datadir.FullName}\{Helper.certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
-            string audio2 = $@"{datadir.FullName}\{Helper.certaingame2}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string old_audio1 = $@"{datadir.FullName}\{Helper.certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string old_audio2 = $@"{datadir.FullName}\{Helper.certaingame2}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
             string[]? audio_pkgversions = null;
-            if (Directory.Exists(audio1)) audio_pkgversions = Directory.GetDirectories(audio1);
-            else if (Directory.Exists(audio2)) audio_pkgversions = Directory.GetDirectories(audio2);
-            else return UpdateCheck(datadir, checkAfter);
+            if (Directory.Exists(old_audio1)) audio_pkgversions = Directory.GetDirectories(old_audio1);
+            else if (Directory.Exists(old_audio2)) audio_pkgversions = Directory.GetDirectories(old_audio2);
+            else // ver >= 3.6
+            {
+                // ...\??? game\???_Data\StreamingAssets\AudioAssets
+                string new_audio1 = $@"{datadir.FullName}\{Helper.certaingame1}_Data\StreamingAssets\AudioAssets";
+                string new_audio2 = $@"{datadir.FullName}\{Helper.certaingame2}_Data\StreamingAssets\Audio\AudioAssets";
+
+                if (Directory.Exists(new_audio1)) audio_pkgversions = Directory.GetDirectories(new_audio1);
+                else if (Directory.Exists(new_audio2)) audio_pkgversions = Directory.GetDirectories(new_audio2);
+                else return UpdateCheck(datadir, checkAfter);
+            }
 
             foreach (string audiopath in audio_pkgversions)
             {
                 string audioname = new DirectoryInfo(audiopath).Name;
-                if (!pkgversionPaths.Contains($"{datadir}\\Audio_{audioname}_pkg_version")) return false;
+                if (!pkgversionPaths.Contains($"{datadir}\\Audio_{audioname}_pkg_version"))
+                {
+                    // ver <= 1.4
+                    Log.Warn($"Not checking Audio: {audioname} for Audio_{audioname}_pkg_version does not exist.", nameof(PkgVersionCheck));
+                }
             }
 
             return UpdateCheck(datadir, checkAfter);
@@ -482,7 +492,7 @@ namespace HappyGenyuanImsactUpdate
 
         static FileInfo GetUpdatePakPath(string gamePath)
         {
-            Log.Info("Paste the full path of update package here. " +
+            Log.Info("Drag the update package here. " +
                 "It should be a zip file.", nameof(GetUpdatePakPath));
             Log.Info("If it's under the game directory, you can just paste the name of zip file here.", nameof(GetUpdatePakPath));
             string? pakPath = RemoveDoubleQuotes(Console.ReadLine());
@@ -504,11 +514,15 @@ namespace HappyGenyuanImsactUpdate
                 }
 
             //To protect fools who really just paste its name
-            if (zipfile.Extension != ".zip" || zipfile.Extension != ".rar" || zipfile.Extension != ".7z")
+            if (zipfile.Extension != ".zip" 
+                || zipfile.Extension != ".rar"
+                || zipfile.Extension != ".7z"
+                || zipfile.Extension != ".001")
             {
                 if (File.Exists($"{pakPath}.zip")) pakPath += ".zip";
                 else if (File.Exists($"{pakPath}.rar")) pakPath += ".rar";
                 else if (File.Exists($"{pakPath}.7z")) pakPath += ".7z";
+                else if (File.Exists($"{pakPath}.001")) pakPath += ".001";
                 zipfile = new(pakPath);
             }
 
@@ -574,7 +588,17 @@ namespace HappyGenyuanImsactUpdate
                 {
                     foreach (var zip in zips)
                     {
-                        zip.Delete();
+                        try
+                        {
+                            zip.Delete();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warn(ex.ToString(), nameof(DeleteZipFilesReq));
+                            Log.Warn($"Deleting package: {zip} failed. " +
+                                $"You may close and delete it yourself.",
+                                nameof(DeleteZipFilesReq));
+                        }
                     }
                 }
                 else if (s.ToLower() == "n")
@@ -588,13 +612,20 @@ namespace HappyGenyuanImsactUpdate
                     return;
                 }
             }
-            else
+            else if ((bool)delete)
             {
-                if ((bool)delete)
+                foreach (var zip in zips)
                 {
-                    foreach (var zip in zips)
+                    try
                     {
                         zip.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn(ex.ToString(), nameof(DeleteZipFilesReq));
+                        Log.Warn($"Deleting package: {zip} failed. " +
+                            $"You may close and delete it yourself.",
+                            nameof(DeleteZipFilesReq));
                     }
                 }
             }
