@@ -1,5 +1,6 @@
 ﻿using HappyGenyuanImsactUpdate;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using System.Web;
 using YYHEggEgg.Logger;
@@ -22,7 +23,8 @@ namespace HDiffPatchCreator
                 console_Minimum_LogLevel: LogLevel.Information,
                 debug_LogWriter_AutoFlush: true));
 
-            Log.Info("----------Happy hdiff creator----------");
+            string? version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
+            Log.Info($"----------Happy hdiff creator (v{version ?? "<unknown>"})----------");
             Helper.CheckForRunningInZipFile();
 
             Helper.CheckForTools();
@@ -137,7 +139,11 @@ namespace HDiffPatchCreator
 
             if (areIdentical == true)
             {
-                Log.Warn("The two folders are the same!");
+                Log.Warn("The two folders are the same! Seem not need patch.");
+                Log.Info($"from {verFrom}: {dirFrom}");
+                Log.Info($"to {verTo}: {dirTo}");
+                Log.Warn($"Please confirm the paths are true. Press Enter to continue, or Press Ctrl+C to cancel.");
+                Console.ReadLine();
             }
             #endregion
 
