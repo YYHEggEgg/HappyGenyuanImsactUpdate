@@ -1,5 +1,6 @@
 ﻿using HappyGenyuanImsactUpdate;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using System.Web;
 using YYHEggEgg.Logger;
@@ -22,7 +23,8 @@ namespace HDiffPatchCreator
                 console_Minimum_LogLevel: LogLevel.Information,
                 debug_LogWriter_AutoFlush: true));
 
-            Log.Info("----------Happy hdiff creator----------");
+            string? version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
+            Log.Info($"----------Happy hdiff creator (v{version ?? "<unknown>"})----------");
             Helper.CheckForRunningInZipFile();
 
             Helper.CheckForTools();

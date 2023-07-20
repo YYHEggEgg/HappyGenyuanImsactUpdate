@@ -2,6 +2,7 @@
 // A hdiff-using update program of a certain anime game.
 
 using Microsoft.Toolkit.Uwp.Notifications;
+using System.Reflection;
 using YYHEggEgg.Logger;
 using YYHEggEgg.Utils;
 
@@ -19,7 +20,8 @@ namespace HappyGenyuanImsactUpdate
                 console_Minimum_LogLevel: LogLevel.Information,
                 debug_LogWriter_AutoFlush: true));
 
-            Log.Info($"Welcome to the update program! (v{Environment.Version})");
+            string? version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
+            Log.Info($"Welcome to the update program! (v{version ?? "<unknown>"})");
             Helper.CheckForRunningInZipFile();
 
             //Not working path, but the path where the program located
@@ -433,7 +435,12 @@ namespace HappyGenyuanImsactUpdate
             }
 
             var pkgversionPaths = UpCheck.GetPkgVersion(datadir);
-            if (!pkgversionPaths.Contains($"{datadir}\\pkg_version")) return false;
+            if (!pkgversionPaths.Contains($"{datadir}\\pkg_version"))
+            {
+                Log.Warn($"Can't find pkg_version file. No checks are performed.", nameof(PkgVersionCheck));
+                Log.Info($"It's normal if you're attempting to update Honkai: March 7th.", nameof(PkgVersionCheck));
+                return true;
+            }
 
             // ...\??? game\???_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows
             string old_audio1 = $@"{datadir.FullName}\{Helper.certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
