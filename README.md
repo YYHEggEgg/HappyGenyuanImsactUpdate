@@ -3,8 +3,16 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
 
-## License Change Notice
+## Annoucements
+### License Change Notice
 As of Aug 30, 2023, this project has been re-licensed under the MIT License. All previous and future contributions are subject to this new license.
+
+### [Don't use this for ->3.6 Update](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)
+From 3.6, miHoYo changed `StreamingAssets/Audio/GeneratedSoundBanks/Windows` to `StreamingAssets/AudioAssets`, but the launcher is responsible for the modification, not the update package.  
+
+This won't be fixed as I don't want to pollute the code any more. 
+
+This is most probably a temporaily a corner case and **this Updater program is still avaliable in >=3.7 versions**. For more information, go to [this issue](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15).
 
 ## New feature
 ### v3.2.2
