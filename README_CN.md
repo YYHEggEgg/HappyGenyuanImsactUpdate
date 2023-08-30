@@ -1,9 +1,17 @@
 中文 | [EN](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/blob/main/README.md)
 
 # HappyGenyuanImsactUpdate
-A hdiff-using update program of a certain anime game.
+A hdiff-using update program of a certain anime game.   
+
+## 许可证更改通知
+自 2023 年 8 月 30 日 起，本项目已经更改为 MIT 许可证。所有以前和未来的贡献都受此新许可证约束。
 
 ## 新版本特性
+## v3.2.2
+### Updater
+- 修复了 Updater 无法正确支持 崩坏：整活铁道 的问题。
+- 软件现在打包 .NET 6.0 运行时发布。
+
 ### v3.2.1
 #### Updater
 - 修复了 Updater 在 <=1.5 版本下异常提示无法检查音频包完整性的问题。
@@ -27,7 +35,10 @@ A hdiff-using update program of a certain anime game.
 
 供您自己电脑上使用的文件可能会包含小更新和缓存内容，使用包的人可能并不具备这些文件。**将缓存放入包内甚至可能导致您的个人信息泄露。**
 
-您可以前往这里下载来自官方的文件： [Downloads Archive](https://github.com/Angoks/GI-Download-Library)
+您可以前往这里下载来自官方的文件：
+
+- [Anime Game Downloads Archive](https://github.com/Angoks/GI-Download-Library)
+- [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
 
 ## 如何找到游戏目录文件夹    
 1. 打开启动器   

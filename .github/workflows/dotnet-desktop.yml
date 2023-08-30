@@ -72,21 +72,15 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
-      
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
-
-    # Execute all unit tests in the solution
-    - name: Execute unit tests
-      run: dotnet test
-
     # Build
-    - name: Build
+    - name: Create release
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /m /p:Configuration=$env:Configuration $env:SOLUTION_FILE_PATH
-      env:
-        Configuration: ${{ matrix.configuration }}
+      run: create-release.bat
+
+    # Upload artifact
+    - name: Upload release
+      uses: actions/upload-artifact@v2
+      with:
+        name: Release-windows7-x64
+        path: Release-windows7-x64
+        retention-days: 7

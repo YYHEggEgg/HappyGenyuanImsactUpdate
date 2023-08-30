@@ -3,7 +3,15 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
 
+## License Change Notice
+As of Aug 30, 2023, this project has been re-licensed under the MIT License. All previous and future contributions are subject to this new license.
+
 ## New feature
+### v3.2.2
+#### Updater
+- Fixed the issue where the Updater won't work with `Honkai: March 7th`.
+- The software is now packed with dotnet runtime (6.0).
+
 ### v3.2.1
 #### Updater
 - Fixed the issue where the Updater won't work with anime game version <= `1.5`.
@@ -27,7 +35,10 @@ Notice: It's highly recommended to **use original packages from the anime game c
 
 Files from your own computer will probably contains live updates and caches, which some users don't have. **Putting caches into the package will be likely to make your personal information got leaked.**
 
-You can turn to this repository to download files from `the anime game company`: [Downloads Archive](https://github.com/Angoks/GI-Download-Library)
+You can turn to this repository to download files from `the anime game company`: 
+
+- [Anime Game Downloads Archive](https://github.com/Angoks/GI-Download-Library)
+- [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
 
 ## Usage
 ### How to use the patcher / Updater
