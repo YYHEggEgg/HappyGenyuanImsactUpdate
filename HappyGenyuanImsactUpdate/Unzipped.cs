@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HappyGenyuanImsactUpdate
+﻿namespace HappyGenyuanImsactUpdate
 {
     // NOTE: Because some dawn packages from gdrive has a sub folder, we should move it back.
     internal class Unzipped
