@@ -72,6 +72,6 @@ jobs:
     - name: Upload release
       uses: actions/upload-artifact@v2
       with:
-        name: Release-windows7-x64
-        path: Release-windows7-x64
+        name: Release-windows7-x86
+        path: Release-windows7-x86
         retention-days: 7
