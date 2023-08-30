@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,8 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
-    <Version>3.2.1</Version>
+    <Version>3.2.2</Version>
     <Authors>YYHEggEgg</Authors>
+    <Copyright>Copyright (c) 2023 YYHEggEgg</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
