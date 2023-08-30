@@ -11,6 +11,8 @@ A hdiff-using update program of a certain anime game.
 ### Updater
 - 修复了 Updater 无法正确支持 崩坏：整活铁道 的问题。
 - 软件现在打包 .NET 6.0 运行时发布。
+- 在发行版中将会支持 32 位 Windows。
+- 在 Windows 7 上添加了右下角气泡提示。Windows 10 上此功能仍然表现为“通知”。
 
 ### v3.2.1
 #### Updater

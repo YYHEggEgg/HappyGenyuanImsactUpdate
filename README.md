@@ -10,7 +10,9 @@ As of Aug 30, 2023, this project has been re-licensed under the MIT License. All
 ### v3.2.2
 #### Updater
 - Fixed the issue where the Updater won't work with `Honkai: March 7th`.
-- The software is now packed with dotnet runtime (6.0).
+- The software is now packed with dotnet runtime (6.0), allowing user not to install runtime.
+- Release version supported Windows x86.
+- Supported balloon tip notice on Windows 7 and newer (notifications instead on >= Windows 10).
 
 ### v3.2.1
 #### Updater
