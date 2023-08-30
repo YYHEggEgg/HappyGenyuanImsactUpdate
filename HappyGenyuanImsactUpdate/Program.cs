@@ -1,7 +1,6 @@
 ﻿/*******HappyGenyuanImsactUpdate*******/
 // A hdiff-using update program of a certain anime game.
 
-using Microsoft.Toolkit.Uwp.Notifications;
 using System.Reflection;
 using YYHEggEgg.Logger;
 using YYHEggEgg.Utils;
@@ -13,12 +12,12 @@ namespace HappyGenyuanImsactUpdate
         static async Task Main(string[] args)
         {
             Log.Initialize(new LoggerConfig(
-                max_Output_Char_Count: -1,
-                use_Console_Wrapper: false,
-                use_Working_Directory: false,
-                global_Minimum_LogLevel: LogLevel.Verbose,
-                console_Minimum_LogLevel: LogLevel.Information,
-                debug_LogWriter_AutoFlush: true));
+                    max_Output_Char_Count: -1,
+                    use_Console_Wrapper: false,
+                    use_Working_Directory: false,
+                    global_Minimum_LogLevel: LogLevel.Verbose,
+                    console_Minimum_LogLevel: LogLevel.Information,
+                    debug_LogWriter_AutoFlush: true));
 
             string? version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
             Log.Info($"Welcome to the update program! (v{version ?? "<unknown>"})");
@@ -196,16 +195,8 @@ namespace HappyGenyuanImsactUpdate
             // It is a proper change because only the newest pkg_version is valid.
             if (!UpdateCheck(datadir, checkAfter))
             {
-                //Require Windows 10.0.17763.0+
-                if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
-                {
-                    // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
-                    new ToastContentBuilder()
-                        .AddArgument("action", "viewConversation")
-                        .AddText("Update failed.")
-                        .AddText("Sorry, the update process was exited because files aren't correct.")
-                        .Show();
-                }
+                Helper.ShowErrorBalloonTip(5000, "Update failed.",
+                    "Sorry, the update process was exited because files aren't correct.");
 
                 Log.Erro("Sorry, the update process was exited because the original files aren't correct.", nameof(PkgVersionCheck));
                 Log.Erro("Press any key to continue. ", nameof(PkgVersionCheck));
@@ -247,16 +238,7 @@ namespace HappyGenyuanImsactUpdate
                 if (File.Exists(deletedfile))
                     File.Delete(deletedfile);
 
-            //Require Windows 10.0.17763.0+
-            if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
-            {
-                // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
-                new ToastContentBuilder()
-                    .AddArgument("action", "viewConversation")
-                    .AddText("Update process is done!")
-                    .AddText("Enjoy the new version!")
-                    .Show();
-            }
+            Helper.ShowInformationBalloonTip(5000, "Update process is done!", "Enjoy the new version!");
 
             DeleteZipFilesReq(zips, ifdeletepackage);
             Log.Info("-------------------------");
@@ -316,16 +298,8 @@ namespace HappyGenyuanImsactUpdate
         {
             if (!File.Exists($"{datadir}\\config.ini")) return;
 
-            //Require Windows 10.0.17763.0+
-            if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763, 0))
-            {
-                // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
-                new ToastContentBuilder()
-                    .AddArgument("action", "viewConversation")
-                    .AddText("The update program meets some problem.")
-                    .AddText("Check it out in the console.")
-                    .Show();
-            }
+            Helper.ShowInformationBalloonTip(5000, "The update program needs you decision.",
+                "You need to apply change to the Launcher config in the console.");
 
             Log.Info("We have noticed that you're probably using an official launcher.", nameof(ConfigChange));
             Log.Info("To make it display the correct version, we would make some change on related file.", nameof(ConfigChange));
@@ -443,16 +417,16 @@ namespace HappyGenyuanImsactUpdate
             }
 
             // ...\??? game\???_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows
-            string old_audio1 = $@"{datadir.FullName}\{Helper.certaingame1}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
-            string old_audio2 = $@"{datadir.FullName}\{Helper.certaingame2}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string old_audio1 = $@"{datadir.FullName}\{Helper.certaingames[0]}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
+            string old_audio2 = $@"{datadir.FullName}\{Helper.certaingames[1]}_Data\StreamingAssets\Audio\GeneratedSoundBanks\Windows";
             string[]? audio_pkgversions = null;
             if (Directory.Exists(old_audio1)) audio_pkgversions = Directory.GetDirectories(old_audio1);
             else if (Directory.Exists(old_audio2)) audio_pkgversions = Directory.GetDirectories(old_audio2);
             else // ver >= 3.6
             {
                 // ...\??? game\???_Data\StreamingAssets\AudioAssets
-                string new_audio1 = $@"{datadir.FullName}\{Helper.certaingame1}_Data\StreamingAssets\AudioAssets";
-                string new_audio2 = $@"{datadir.FullName}\{Helper.certaingame2}_Data\StreamingAssets\Audio\AudioAssets";
+                string new_audio1 = $@"{datadir.FullName}\{Helper.certaingames[0]}_Data\StreamingAssets\AudioAssets";
+                string new_audio2 = $@"{datadir.FullName}\{Helper.certaingames[1]}_Data\StreamingAssets\Audio\AudioAssets";
 
                 if (Directory.Exists(new_audio1)) audio_pkgversions = Directory.GetDirectories(new_audio1);
                 else if (Directory.Exists(new_audio2)) audio_pkgversions = Directory.GetDirectories(new_audio2);
@@ -488,8 +462,7 @@ namespace HappyGenyuanImsactUpdate
             }
 
             DirectoryInfo datadir = new(dataPath);
-            if (!File.Exists($"{datadir}\\{Helper.certaingame1}.exe")
-                && !File.Exists($"{datadir}\\{Helper.certaingame2}.exe"))
+            if (!Helper.AnyCertainGameExists(datadir))
             {
                 Log.Warn("Invaild game path!", nameof(GetDataPath));
                 return GetDataPath();
@@ -521,7 +494,7 @@ namespace HappyGenyuanImsactUpdate
                 }
 
             //To protect fools who really just paste its name
-            if (zipfile.Extension != ".zip" 
+            if (zipfile.Extension != ".zip"
                 || zipfile.Extension != ".rar"
                 || zipfile.Extension != ".7z"
                 || zipfile.Extension != ".001")

@@ -7,3 +7,6 @@
 /HDiffPatchCreator/obj
 /HDiffPatchCreator/Properties
 /.vscode
+/Release-windows7-x64
+/Release-windows7-x86
+/Updater-windows7-x86-packed-runtime

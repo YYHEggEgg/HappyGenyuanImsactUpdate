@@ -99,14 +99,12 @@ namespace HDiffPatchCreator
                 Usage();
                 Environment.Exit(1);
             }
-            if (!File.Exists($"{dirFrom}\\{Helper.certaingame1}.exe")
-                && !File.Exists($"{dirFrom}\\{Helper.certaingame2}.exe"))
+            if (!Helper.AnyCertainGameExists(dirFrom))
             {
                 Log.Erro("Invaild game path! (verFrom)", "InputAssert");
                 Environment.Exit(1);
             }
-            if (!File.Exists($"{dirTo}\\{Helper.certaingame1}.exe")
-                && !File.Exists($"{dirTo}\\{Helper.certaingame2}.exe"))
+            if (!Helper.AnyCertainGameExists(dirTo))
             {
                 Log.Erro("Invaild game path! (verTo)", "InputAssert");
                 Environment.Exit(1);

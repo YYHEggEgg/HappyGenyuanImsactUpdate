@@ -1,11 +1,4 @@
-﻿using Microsoft.Toolkit.Uwp.Notifications;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HappyGenyuanImsactUpdate
+﻿namespace HappyGenyuanImsactUpdate
 {
     //config.ini contains version info
     internal static class ConfigIni

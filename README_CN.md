@@ -1,7 +1,19 @@
 中文 | [EN](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/blob/main/README.md)
 
 # HappyGenyuanImsactUpdate
-A hdiff-using update program of a certain anime game.
+A hdiff-using update program of a certain anime game.   
+
+## 公告
+### 许可证更改通知
+自 2023 年 8 月 30 日 起，本项目已经更改为 MIT 许可证。所有以前和未来的贡献都受此新许可证约束。
+
+### [请勿使用该程序来更新至3.6版本](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)
+
+从3.6开始，miHoYo 将 `StreamingAssets/Audio/GeneratedSoundBanks/Windows` 更改为 `StreamingAssets/AudioAssets`，但由启动器负责修改，不包含在更新包中。
+
+这不会被修复，因为代码可能面临被污染的风险。
+
+这很可能是一个临时的特例，**此更新程序在 3.7 及以后的版本中仍可用**。有关详细信息，请转至 [该 issue](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)。
 
 ## 公告
 
@@ -14,6 +26,13 @@ A hdiff-using update program of a certain anime game.
 这很可能是一个临时的特例，**此更新程序在 3.7 及以后的版本中仍可用**。有关详细信息，请转至 [该 issue](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)。 
 
 ## 新版本特性
+## v3.2.2
+### Updater
+- 修复了 Updater 无法正确支持 崩坏：整活铁道 的问题。
+- 软件现在打包 .NET 6.0 运行时发布。
+- 在发行版中将会支持 32 位 Windows。
+- 在 Windows 7 上添加了右下角气泡提示。Windows 10 上此功能仍然表现为“通知”。
+
 ### v3.2.1
 #### Updater
 - 修复了 Updater 在 <=1.5 版本下异常提示无法检查音频包完整性的问题。
@@ -37,7 +56,10 @@ A hdiff-using update program of a certain anime game.
 
 供您自己电脑上使用的文件可能会包含小更新和缓存内容，使用包的人可能并不具备这些文件。**将缓存放入包内甚至可能导致您的个人信息泄露。**
 
-您可以前往这里下载来自官方的文件： [Downloads Archive](https://github.com/Angoks/GI-Download-Library)
+您可以前往这里下载来自官方的文件：
+
+- [Anime Game Downloads Archive](https://github.com/Angoks/GI-Download-Library)
+- [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
 
 ## 如何找到游戏目录文件夹    
 1. 打开启动器   
