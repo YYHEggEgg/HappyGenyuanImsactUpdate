@@ -9,6 +9,7 @@
     <Version>3.2.2</Version>
 	<Authors>YYHEggEgg</Authors>
 	<Copyright>Copyright (c) 2023 YYHEggEgg</Copyright>
+	<ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
   </PropertyGroup>
 
   <ItemGroup>
