@@ -11,7 +11,7 @@ namespace HappyGenyuanImsactUpdate
         Null = -1
     }
 
-    internal static class UpCheck
+    public static class UpCheck
     {
         #region pkg_versions
         /// <summary>

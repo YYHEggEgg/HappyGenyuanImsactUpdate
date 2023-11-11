@@ -1,7 +1,9 @@
 ﻿using HappyGenyuanImsactUpdate;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Web;
 using YYHEggEgg.Logger;
 using YYHEggEgg.Utils;
@@ -33,9 +35,10 @@ namespace HDiffPatchCreator
 
             string verFrom = "Unknown", verTo = "Unknown", prefix = "game";
             DirectoryInfo? dirFrom = null, dirTo = null, outputAt = null;
-            bool createReverse = false, performCheck = true;
+            bool createReverse = false, performCheck = true, 
+                onlyIncludeDefinedFiles = false, includeAudioVersions = false;
             #region Command Line
-            bool[] arghaveread = new bool[6];
+            bool[] arghaveread = new bool[8];
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -79,6 +82,14 @@ namespace HDiffPatchCreator
                             ReadAssert(5);
                             performCheck = false;
                             break;
+                        case "--only-include-pkg-defined-files":
+                            ReadAssert(6);
+                            onlyIncludeDefinedFiles = true;
+                            break;
+                        case "--include-audios":
+                            ReadAssert(7);
+                            includeAudioVersions = true;
+                            break;
                         default:
                             Usage();
                             return;
@@ -109,6 +120,11 @@ namespace HDiffPatchCreator
                 Log.Erro("Invaild game path! (verTo)", "InputAssert");
                 Environment.Exit(1);
             }
+            if (!onlyIncludeDefinedFiles && includeAudioVersions)
+            {
+                Log.Erro("--include-audios option is only valid when --only-include-pkg-defined-files option exists!", "InputAssert");
+                Environment.Exit(1);
+            }
             #endregion
 
             if (performCheck)
@@ -122,8 +138,50 @@ namespace HDiffPatchCreator
             }
 
             // Take a snapshot of the file system
+            Log.Info($"Start Emunerating directories, it'll probably take a long time...");
             IEnumerable<FileInfo> list1 = dirFrom.GetFiles("*.*", SearchOption.AllDirectories);
             IEnumerable<FileInfo> list2 = dirTo.GetFiles("*.*", SearchOption.AllDirectories);
+
+            #region Select files (--only-include-pkg-defined-files)
+            if (onlyIncludeDefinedFiles)
+            {
+                List<string> pkgVersions = new()
+                    { Path.GetFullPath("pkg_version", dirFrom.FullName) };
+                if (includeAudioVersions)
+                    pkgVersions.AddRange(UpCheck.GetPkgVersion(dirFrom));
+
+                var definedFiles1 = new SortedSet<string>((
+                    from pkgVersion in pkgVersions
+                    from json in File.ReadLines(pkgVersion)
+                    let doc = JsonDocument.Parse(json)
+                    let fullName = Path.GetFullPath(dirFrom.FullName + '/'
+                        + doc.RootElement.GetProperty("remoteName").GetString())
+                    select fullName).Concat(
+                    from pkgVersion in pkgVersions
+                    select Path.Combine(dirFrom.FullName, pkgVersion)));
+                list1 = from fileInfo in list1
+                        where definedFiles1.Contains(fileInfo.FullName)
+                        select fileInfo;
+
+                pkgVersions = new()
+                    { Path.GetFullPath("pkg_version", dirTo.FullName) };
+                if (includeAudioVersions)
+                    pkgVersions.AddRange(UpCheck.GetPkgVersion(dirTo));
+
+                var definedFiles2 = new SortedSet<string>((
+                    from pkgVersion in pkgVersions
+                    from json in File.ReadLines(pkgVersion)
+                    let doc = JsonDocument.Parse(json)
+                    let fullName = Path.GetFullPath(dirTo.FullName + '/'
+                        + doc.RootElement.GetProperty("remoteName").GetString())
+                    select fullName).Concat(
+                    from pkgVersion in pkgVersions
+                    select Path.Combine(dirTo.FullName, pkgVersion)));
+                list2 = from fileInfo in list2
+                        where definedFiles2.Contains(fileInfo.FullName)
+                        select fileInfo;
+            }
+            #endregion
 
             //A custom file comparer defined below  
             FileCompare cmp = new FileCompare(dirFrom, dirTo);
@@ -175,14 +233,21 @@ namespace HDiffPatchCreator
             Log.Info("  -to <versionTo> <target_directory>", "CommandLine");
             Log.Info("  -output_to <output_zip_directory>", "CommandLine");
             Log.Info("  [-p <prefix>] [-reverse] [--skip-check]", "CommandLine");
+            Log.Info("  [--only-include-pkg-defined-files [--include-audios]]", "CommandLine");
             Log.Info("", "CommandLine");
             Log.Info("By using this program, you can get a package named: ", "CommandLine");
             Log.Info("[prefix]_<versionFrom>_<versionTo>_hdiff_<randomstr>.zip", "CommandLine");
             Log.Info("e.g. game_3.4_8.0_hdiff_nj89iGjh4d.zip", "CommandLine");
             Log.Info("If not given, prefix will be 'game'.", "CommandLine");
             Log.Info("", "CommandLine");
+            Log.Info("-reverse: After package is created, reverse 'versionFrom' and 'versionTo' and create another package.", "CommandLine");
+            Log.Info("", "CommandLine");
+            Log.Info("--skip-check: skip the check (Basic Mode, only compare file size). ", "CommandLine");
             Log.Info("Notice: For the patch creator, MD5 computing when comparing files is essential.", "CommandLine");
             Log.Info("You can't choose not to use it.", "CommandLine");
+            Log.Info("", "CommandLine");
+            Log.Info("--only-include-pkg-defined-files: ignore all files not defined in 'pkg_version' file.", "CommandLine");
+            Log.Info("  --include-audios: Apply files defined in 'Audio_*_version' with an exception for ignore.", "CommandLine");
         }
 
         static async Task CreatePatch(IEnumerable<FileInfo> filesFrom, IEnumerable<FileInfo> filesTo,
