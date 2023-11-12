@@ -15,19 +15,15 @@ A hdiff-using update program of a certain anime game.
 
 这很可能是一个临时的特例，**此更新程序在 3.7 及以后的版本中仍可用**。有关详细信息，请转至 [该 issue](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)。
 
-## 公告
-
-### [请勿使用该程序来更新至3.6版本](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)
-
-从3.6开始，miHoYo 将 `StreamingAssets/Audio/GeneratedSoundBanks/Windows` 更改为 `StreamingAssets/AudioAssets`，但由启动器负责修改，不包含在更新包中。
-
-这不会被修复，因为代码可能面临被污染的风险。
-
-这很可能是一个临时的特例，**此更新程序在 3.7 及以后的版本中仍可用**。有关详细信息，请转至 [该 issue](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)。 
-
 ## 新版本特性
-## v3.2.2
-### Updater
+### v3.2.3
+- 由于提供的 `7z.exe`、`hpatchz.exe` 与 `hdiffz.exe` 均为 64 位程序，取消了对于 32 位 Windows 的支持计划。
+
+#### Patch Creator
+- 更新了 `--only-include-pkg-defined-files`、`--include-audios` 选项。有关详细信息，请参阅 [如何使用 - 创建更新包 / Patch Creater](#创建更新包--patch-creater).
+
+### v3.2.2
+#### Updater
 - 修复了 Updater 无法正确支持 崩坏：整活铁道 的问题。
 - 软件现在打包 .NET 6.0 运行时发布。
 - 在发行版中将会支持 32 位 Windows。
@@ -109,6 +105,7 @@ Usage: hdiffpatchcreator
   -to <更新后版本> <所在文件夹>
   -output_to <输出文件夹，存放更新包和临时文件>
   [-p <前缀>] [-reverse] [--skip-check]
+  [--only-include-pkg-defined-files [--include-audios]]
 ```
 
 使用程序可以得到这样一个更新包：
@@ -117,3 +114,10 @@ Usage: hdiffpatchcreator
 ```
 如 `game_3.4_8.0_hdiff_nj89iGjh4d.zip`
 前缀默认为 `game`.
+
+`-reverse` 选项在创建更新包后，更换“更新前版本”与“更新后版本”并再创建一个包。
+
+`--skip-check` 选项跳过基于文件大小比较的基础检查。但注意：对于 Patch Creator，由于需要进行严格的文件比较，程序一定会对文件进行 MD5 计算。建议您在读写速度较快的存储设备上（如 SSD）进行创建更新包的操作。
+
+`--only-include-pkg-defined-files` 可以在创建更新包时忽略 `pkg_version` 定义以外的所有文件，以避免本地的热更新、缓存、错误日志等无关内容被包括在更新包中。  
+`--only-include-pkg-defined-files` 并不包括 `Audio_*_pkg_version` 定义的特定语言配音音频包文件。如果需要包含它们，请指定 `--include-audios` 选项。

@@ -15,6 +15,14 @@ This won't be fixed as I don't want to pollute the code any more.
 This is most probably a temporaily a corner case and **this Updater program is still avaliable in >=3.7 versions**. For more information, go to [this issue](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15).
 
 ## New feature
+### v3.2.3
+
+- Due to the fact that the provided `7z.exe`, `hpatchz.exe` and `hdiffz.exe` are all 64-bit programs, the support plan for 32-bit Windows has been cancelled.
+
+#### Patch Creator
+
+- The `--only-include-pkg-defined-files` and `--include-audios` option have been supported. For more information, please refer to [Usage - How to create a patch / Patch Creator](#how-to-create-a-patch--patch-creater).
+
 ### v3.2.2
 #### Updater
 - Fixed the issue where the Updater won't work with `Honkai: March 7th`.
@@ -86,3 +94,10 @@ By using this program, you can get a package named:
 ```
 e.g. `game_3.4_8.0_hdiff_nj89iGjh4d.zip`
 If not given, prefix will be `game`.
+
+`-reverse` option: After package is created, reverse 'versionFrom' and 'versionTo' and create another package.
+
+`--skip-check` option: skip the Basic Mode check (only compare file size). Notice: For the patch creator, MD5 computing when comparing files is essential. You are recommended to create Update packages on a disk with high I/O speed (like SSD).
+
+`--only-include-pkg-defined-files` option: ignore all files not defined in 'pkg_version' file to avoid unrelated content, like local live updates, cache and error logs, to be included in the update package.  
+`--only-include-pkg-defined-files` excludes specified language audio files defined in `Audio_*_pkg_version`. If want to include them, use `--include-audios` option.
