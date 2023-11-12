@@ -12,11 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EggEgg.CSharp-Logger" Version="3.0.0" />
+    <PackageReference Include="EggEgg.CSharp-Logger" Version="4.0.1" />
   </ItemGroup>
 	
   <ItemGroup>
-	<FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
+	  <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
   </ItemGroup>
 
 </Project>
