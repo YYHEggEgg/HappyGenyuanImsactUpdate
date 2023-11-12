@@ -6,10 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
-    <Version>3.2.2</Version>
-	<Authors>YYHEggEgg</Authors>
-	<Copyright>Copyright (c) 2023 YYHEggEgg</Copyright>
-	<ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+    <Version>3.2.3</Version>
+	  <Authors>YYHEggEgg</Authors>
+	  <Copyright>Copyright (c) 2023 YYHEggEgg</Copyright>
+	  <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
   </PropertyGroup>
 
   <ItemGroup>
