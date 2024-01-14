@@ -55,7 +55,7 @@ Files from your own computer will probably contains live updates and caches, whi
 
 You can turn to this repository to download files from `the anime game company`: 
 
-- [Anime Game Downloads Archive](https://github.com/Angoks/GI-Download-Library)
+- [Anime Game Downloads Archive](https://git.xeondev.com/YYHEggEgg/GI-Download-Library)
 - [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
 
 ## Usage
