@@ -54,7 +54,7 @@ A hdiff-using update program of a certain anime game.
 
 您可以前往这里下载来自官方的文件：
 
-- [Anime Game Downloads Archive](https://github.com/Angoks/GI-Download-Library)
+- [Anime Game Downloads Archive](https://git.xeondev.com/YYHEggEgg/GI-Download-Library)
 - [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
 
 ## 如何找到游戏目录文件夹    
