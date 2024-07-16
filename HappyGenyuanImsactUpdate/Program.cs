@@ -464,7 +464,8 @@ namespace HappyGenyuanImsactUpdate
             DirectoryInfo datadir = new(dataPath);
             if (!Helper.AnyCertainGameExists(datadir))
             {
-                Log.Warn("Invaild game path!", nameof(GetDataPath));
+                Log.Warn("No known game executable found under directory. Do you believe the path is correct? Type 'y' to confirm.", nameof(GetDataPath));
+                if (Console.ReadLine()?.ToLower() == "y") return datadir;
                 return GetDataPath();
             }
             else return datadir;

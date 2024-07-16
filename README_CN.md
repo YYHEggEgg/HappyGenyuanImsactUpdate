@@ -15,7 +15,16 @@ A hdiff-using update program of a certain anime game.
 
 这很可能是一个临时的特例，**此更新程序在 3.7 及以后的版本中仍可用**。有关详细信息，请转至 [该 issue](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15)。
 
+### 关于有限支持的说明
+
+自 4.6 版本起，HoYoPlay 逐渐将 `sophon chunk` 作为其主要的更新分发与安装模式。
+
+本程序仅对 hdiff 更新包适配，故不会添加对相应功能的支持；但本软件仍然会进行基本 Bug 修复与优化的更新（如果必要）。
+
 ## 新版本特性
+### v3.2.4
+- 在使用 `Updater` 时，目录下如果不存在（可被程序识别的）游戏可执行文件，允许用户手动二次确认继续。
+
 ### v3.2.3
 - 由于提供的 `7z.exe`、`hpatchz.exe` 与 `hdiffz.exe` 均为 64 位程序，取消了对于 32 位 Windows 的支持计划。
 

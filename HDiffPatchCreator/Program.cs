@@ -112,13 +112,11 @@ namespace HDiffPatchCreator
             }
             if (!Helper.AnyCertainGameExists(dirFrom))
             {
-                Log.Erro("Invaild game path! (verFrom)", "InputAssert");
-                Environment.Exit(1);
+                Log.Warn("<color=Yellow>WARNING</color>: No known game executable under game path. (verFrom)");
             }
             if (!Helper.AnyCertainGameExists(dirTo))
             {
-                Log.Erro("Invaild game path! (verTo)", "InputAssert");
-                Environment.Exit(1);
+                Log.Warn("<color=Yellow>WARNING</color>: No known game executable under game path. (verTo)");
             }
             if (!onlyIncludeDefinedFiles && includeAudioVersions)
             {
