@@ -8,7 +8,7 @@
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <Version>3.2.4</Version>
     <Authors>YYHEggEgg</Authors>
-    <Copyright>Copyright (c) 2023 YYHEggEgg</Copyright>
+    <Copyright>Copyright (c) 2024 YYHEggEgg</Copyright>
     <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
   </PropertyGroup>
 

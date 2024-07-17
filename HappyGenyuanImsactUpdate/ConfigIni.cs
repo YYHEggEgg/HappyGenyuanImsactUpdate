@@ -51,7 +51,7 @@
             {
                 while (true)
                 {
-                    string line = reader.ReadLine();
+                    string? line = reader.ReadLine();
                     if (line == null || line == string.Empty) break;
                     if (line.StartsWith("game_version="))
                         line = $"game_version={version}";

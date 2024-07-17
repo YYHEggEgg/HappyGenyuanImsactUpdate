@@ -271,7 +271,7 @@ namespace HDiffPatchCreator
             foreach (var file in toOnly)
             {
                 var newfile = new FileInfo($"{tmpFilePath}\\{FileCompare.GetRelativePath(file, dirTo)}");
-                Directory.CreateDirectory(newfile.DirectoryName);
+                CreateDirectoryFor(newfile);
                 Log.Info($"Copying: {file.FullName} -> {newfile.FullName}", $"{nameof(CreatePatch)}_FileCopy");
                 File.Copy(file.FullName, newfile.FullName);
             }
@@ -320,7 +320,7 @@ namespace HDiffPatchCreator
                 else
                 {
                     Log.Warn($"HDiff failed, fallback to diff, file fromVer: {fromPath.FullName}, toVer: {toPath.FullName}", $"{nameof(CreatePatch)}_Hdiff");
-                    Directory.CreateDirectory(diffPath.DirectoryName);
+                    CreateDirectoryFor(diffPath);
                     Debug.Assert(false);
                     File.Copy(toPath.FullName, $"{tmpFilePath}\\{relativePath}");
                 }
@@ -356,7 +356,7 @@ namespace HDiffPatchCreator
 
         static async Task<bool> InvokeHDiffz(string source, string target, string outdiffpath, int retry = 5)
         {
-            Directory.CreateDirectory(new FileInfo(outdiffpath).DirectoryName);
+            CreateDirectoryFor(new FileInfo(outdiffpath));
 
             return await OuterInvoke.Run(new OuterInvokeInfo
             {
@@ -380,6 +380,12 @@ namespace HDiffPatchCreator
             return res;
         }
         #endregion
+
+        private static void CreateDirectoryFor(FileInfo file)
+        {
+            if (file.DirectoryName == null) return;
+            Directory.CreateDirectory(file.DirectoryName);
+        }
     }
 
     internal class FileCompare : IEqualityComparer<FileInfo>
