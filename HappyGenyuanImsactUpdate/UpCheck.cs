@@ -111,7 +111,7 @@ namespace HappyGenyuanImsactUpdate
                         if (checkAfter == CheckMode.Full)
                         {
                             #region MD5 Check
-                            string md5Expected = doce.GetProperty("md5").GetString();
+                            string? md5Expected = doce.GetProperty("md5").GetString();
                             if (MyMD5.GetMD5HashFromFile(checkPathstd) != md5Expected)
                             {
                                 Log.Warn(ReportFileError(checkPathstd, "The file is not correct"), nameof(CheckByPkgVersion));

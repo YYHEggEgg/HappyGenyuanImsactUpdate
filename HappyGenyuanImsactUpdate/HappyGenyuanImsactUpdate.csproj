@@ -6,17 +6,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
-    <Version>3.2.3</Version>
+    <Version>3.2.4</Version>
     <Authors>YYHEggEgg</Authors>
     <Copyright>Copyright (c) 2023 YYHEggEgg</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EggEgg.CSharp-Logger" Version="4.0.1" />
+    <PackageReference Include="EggEgg.CSharp-Logger" Version="5.0.0" />
   </ItemGroup>
-	
+
   <ItemGroup>
-	  <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
+    <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
   </ItemGroup>
 
 </Project>

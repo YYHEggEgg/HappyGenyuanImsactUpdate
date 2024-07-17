@@ -14,7 +14,17 @@ This won't be fixed as I don't want to pollute the code any more.
 
 This is most probably a temporaily a corner case and **this Updater program is still avaliable in >=3.7 versions**. For more information, go to [this issue](https://github.com/YYHEggEgg/HappyGenyuanImsactUpdate/issues/15).
 
+### Explanation of Limited Support
+
+Since version 4.6, HoYoPlay has gradually adopted `sophon chunk` as its primary update distribution and installation mode.
+
+This program only adapts to hdiff update packages, so it will not add support for the corresponding feature. However, this software will still receive basic bug fixes and optimization updates (if necessary).
+
 ## New feature
+
+### v3.2.4
+- When using the `Updater`, if the executable file of the game (that can be recognized by program) does not exist in the directory, users are allowed to manually confirm to continue.
+
 ### v3.2.3
 
 - Due to the fact that the provided `7z.exe`, `hpatchz.exe` and `hdiffz.exe` are all 64-bit programs, the support plan for 32-bit Windows has been cancelled.

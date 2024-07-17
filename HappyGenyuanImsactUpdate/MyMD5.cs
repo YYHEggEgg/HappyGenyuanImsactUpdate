@@ -9,7 +9,7 @@ namespace HappyGenyuanImsactUpdate
         {
             FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             //MD5 md5 = new MD5CryptoServiceProvider();
-            MD5 md5 = MD5.Create("MD5");
+            MD5 md5 = MD5.Create();
             byte[] retVal = md5.ComputeHash(file);
             file.Close();
             StringBuilder sb = new StringBuilder();

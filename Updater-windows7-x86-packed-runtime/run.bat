@@ -1,1 +1,0 @@
-.\bin\HappyGenyuanImsactUpdate.exe

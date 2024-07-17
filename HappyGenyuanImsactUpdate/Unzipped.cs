@@ -16,10 +16,11 @@
 
         private static List<string> GetNewlyAppearedFolders(string[]? predirs, string[]? nowdirs)
         {
+            if (nowdirs == null) return new();
             List<string> newdirs = new();
             foreach (var dir in nowdirs)
             {
-                if (!predirs.Contains(dir)) newdirs.Add(dir);
+                if (predirs == null || !predirs.Contains(dir)) newdirs.Add(dir);
             }
             return newdirs;
         }
