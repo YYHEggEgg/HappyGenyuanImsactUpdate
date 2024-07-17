@@ -3,6 +3,14 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.   
 
+## 可用包体下载
+
+您可以前往这里下载来自官方的 hdiff 更新包与完整包：
+
+- [Anime Game Downloads Archive](https://git.xeondev.com/YYHEggEgg/GI-Download-Library)
+- [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
+- [3Z Downloads Archive](https://github.com/360NENZ/ZZZ-Download-Library)
+
 ## 公告
 ### 许可证更改通知
 自 2023 年 8 月 30 日 起，本项目已经更改为 MIT 许可证。所有以前和未来的贡献都受此新许可证约束。
@@ -59,28 +67,19 @@ A hdiff-using update program of a certain anime game.
 
 注意：强烈建议**仅使用原本的官方包为源文件**创建更新包。
 
-供您自己电脑上使用的文件可能会包含小更新和缓存内容，使用包的人可能并不具备这些文件。**将缓存放入包内甚至可能导致您的个人信息泄露。**
-
-您可以前往这里下载来自官方的文件：
-
-- [Anime Game Downloads Archive](https://git.xeondev.com/YYHEggEgg/GI-Download-Library)
-- [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
+供您自己电脑上使用的文件可能会包含小更新和缓存内容，使用包的人可能并不具备这些文件。**将缓存放入包内甚至可能导致您的个人信息泄露。** 有关信息参见 [可用包体下载](#可用包体下载).
 
 ## 如何找到游戏目录文件夹    
 1. 打开米哈游启动器   
 2. 点击“开始游戏”或“更新游戏”旁的菜单  
-<!-- ![Launcher UI](Tutorial%20Images/rel_v3.2.4%2B/cn_img01.png) -->
 ![Launcher UI](https://raw.githubusercontent.com/YYHEggEgg/HappyGenyuanImsactUpdate/main/Tutorial%20Images/rel_v3.2.4%2B/cn_img01.png)
 
-3. 点击“安装位置”选项
-4. 找到启动器显示的文件夹 (**注意：图片仅供参考，目录在您自己的电脑上与图片中不同！**)  
-<!-- ![Installation Location](Tutorial%20Images/rel_v3.2.4%2B/cn_img02.png) -->
+3. 点击“游戏设置”选项
+4. 找到启动器显示的文件夹 (**注意：图片仅供参考，目录在您自己的电脑上与图片中不同！**)
+
+5. 您也可以点击下方的“打开所在目录”按钮，直接点击地址栏并复制目录。如果您已从官方启动器预下载了更新文件，可以在内看到 `chunk` 文件夹。**本更新程序不适用于此种更新模式，请另行下载 hdiff 更新包。** 有关信息参见 [可用包体下载](#可用包体下载).  
+
 ![Installation Location](https://raw.githubusercontent.com/YYHEggEgg/HappyGenyuanImsactUpdate/main/Tutorial%20Images/rel_v3.2.4%2B/cn_img02.png)
-
-如果您已从官方启动器预下载了更新文件，可以在内看到 `chunk` 文件夹。**本更新程序不适用于此种更新模式，请另行下载 hdiff 更新包。**
-
-5. 您也可以点击下方的“打开所在目录”按钮，直接点击地址栏并复制目录。
-
 ## 如何使用
 ### 补丁工具使用 / Updater
 你需要以下文件:

@@ -3,6 +3,13 @@
 # HappyGenyuanImsactUpdate
 A hdiff-using update program of a certain anime game.
 
+## Available Package Download
+You can turn to this repository to download files from `the anime game company`: 
+
+- [Anime Game Downloads Archive](https://git.xeondev.com/YYHEggEgg/GI-Download-Library)
+- [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
+- [3Z Downloads Archive](https://github.com/360NENZ/ZZZ-Download-Library)
+
 ## Annoucements
 ### License Change Notice
 As of Aug 30, 2023, this project has been re-licensed under the MIT License. All previous and future contributions are subject to this new license.
@@ -61,12 +68,7 @@ Just invoke `Patch Creater\HDiffPatchCreator.exe` in command line.
 
 Notice: It's highly recommended to **use original packages from the anime game company only** to create patches.
 
-Files from your own computer will probably contains live updates and caches, which some users don't have. **Putting caches into the package will be likely to make your personal information got leaked.**
-
-You can turn to this repository to download files from `the anime game company`: 
-
-- [Anime Game Downloads Archive](https://git.xeondev.com/YYHEggEgg/GI-Download-Library)
-- [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
+Files from your own computer will probably contains live updates and caches, which some users don't have. **Putting caches into the package will be likely to make your personal information got leaked.** For more information, see [Available Package Download](#available-package-download).
 
 ## Usage
 ### How to use the patcher / Updater
