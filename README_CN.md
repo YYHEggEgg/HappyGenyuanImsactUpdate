@@ -67,15 +67,19 @@ A hdiff-using update program of a certain anime game.
 - [Honkai: March 7th Downloads Archive](https://github.com/keitarogg/HSR-Download-Library)
 
 ## 如何找到游戏目录文件夹    
-1. 打开启动器   
-2. 点击“启动”旁的菜单    
-![Launcher UI](https://raw.githubusercontent.com/YYHEggEgg/HappyGenyuanImsactUpdate/main/Tutorial%20Images/rel_v2.1.2%2B/img01.jpg)    
+1. 打开米哈游启动器   
+2. 点击“开始游戏”或“更新游戏”旁的菜单  
+<!-- ![Launcher UI](Tutorial%20Images/rel_v3.2.4%2B/cn_img01.png) -->
+![Launcher UI](https://raw.githubusercontent.com/YYHEggEgg/HappyGenyuanImsactUpdate/main/Tutorial%20Images/rel_v3.2.4%2B/cn_img01.png)
 
 3. 点击“安装位置”选项
-4. 找到启动器显示的文件夹 (**注意：图片仅供参考，目录在您自己的电脑上与图片中不同！**)
-![Installation Location](https://raw.githubusercontent.com/YYHEggEgg/HappyGenyuanImsactUpdate/main/Tutorial%20Images/rel_v2.1.2%2B/img02.jpg)  
+4. 找到启动器显示的文件夹 (**注意：图片仅供参考，目录在您自己的电脑上与图片中不同！**)  
+<!-- ![Installation Location](Tutorial%20Images/rel_v3.2.4%2B/cn_img02.png) -->
+![Installation Location](https://raw.githubusercontent.com/YYHEggEgg/HappyGenyuanImsactUpdate/main/Tutorial%20Images/rel_v3.2.4%2B/cn_img02.png)
 
-如果您已从官方启动器预下载了更新文件，也可以在内看到两个更新包（通常为 `.zip` 文件）。
+如果您已从官方启动器预下载了更新文件，可以在内看到 `chunk` 文件夹。**本更新程序不适用于此种更新模式，请另行下载 hdiff 更新包。**
+
+5. 您也可以点击下方的“打开所在目录”按钮，直接点击地址栏并复制目录。
 
 ## 如何使用
 ### 补丁工具使用 / Updater
