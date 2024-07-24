@@ -37,8 +37,9 @@ namespace HDiffPatchCreator
             DirectoryInfo? dirFrom = null, dirTo = null, outputAt = null;
             bool createReverse = false, performCheck = true, 
                 onlyIncludeDefinedFiles = false, includeAudioVersions = false;
+            long volumeSplitSize = 0;
             #region Command Line
-            bool[] arghaveread = new bool[8];
+            bool[] arghaveread = new bool[9];
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -90,7 +91,13 @@ namespace HDiffPatchCreator
                             ReadAssert(7);
                             includeAudioVersions = true;
                             break;
+                        case "--volume-splitting":
+                            ReadAssert(8);
+                            volumeSplitSize = long.Parse(args[i + 1]);
+                            i += 1;
+                            break;
                         default:
+                            Log.Warn($"option '{args[i]}' is not recognized.");
                             Usage();
                             return;
                     }
@@ -122,6 +129,10 @@ namespace HDiffPatchCreator
             {
                 Log.Erro("--include-audios option is only valid when --only-include-pkg-defined-files option exists!", "InputAssert");
                 Environment.Exit(1);
+            }
+            if (arghaveread[8] && volumeSplitSize <= 0)
+            {
+                Log.Warn("<color=Yellow>WARNING</color>: value provided for --volume-splitting is not positive. The option will not make any sense.");
             }
             #endregion
 
@@ -202,12 +213,12 @@ namespace HDiffPatchCreator
             #endregion
 
             await CreatePatch(list1, list2, dirFrom, dirTo,
-                $"{outputAt}\\{prefix}_{verFrom}_{verTo}_hdiff_{Randomstr(16)}.zip", cmp);
+                $"{outputAt}\\{prefix}_{verFrom}_{verTo}_hdiff_{Randomstr(16)}.zip", cmp, volumeSplitSize);
 
             if (createReverse)
             {
                 await CreatePatch(list2, list1, dirTo, dirFrom,
-                    $"{outputAt}\\{prefix}_{verTo}_{verFrom}_hdiff_{Randomstr(16)}.zip", cmp);
+                    $"{outputAt}\\{prefix}_{verTo}_{verFrom}_hdiff_{Randomstr(16)}.zip", cmp, volumeSplitSize);
             }
 
             #region Multiple Read Assert
@@ -231,6 +242,7 @@ namespace HDiffPatchCreator
             Log.Info("  -to <versionTo> <target_directory>", "CommandLine");
             Log.Info("  -output_to <output_zip_directory>", "CommandLine");
             Log.Info("  [-p <prefix>] [-reverse] [--skip-check]", "CommandLine");
+            Log.Info("  [--volume-splitting <maximum_single_file_size>]", "CommandLine");
             Log.Info("  [--only-include-pkg-defined-files [--include-audios]]", "CommandLine");
             Log.Info("", "CommandLine");
             Log.Info("By using this program, you can get a package named: ", "CommandLine");
@@ -249,7 +261,8 @@ namespace HDiffPatchCreator
         }
 
         static async Task CreatePatch(IEnumerable<FileInfo> filesFrom, IEnumerable<FileInfo> filesTo,
-            DirectoryInfo dirFrom, DirectoryInfo dirTo, string createpakPath, FileCompare cmp)
+            DirectoryInfo dirFrom, DirectoryInfo dirTo, string createpakPath, FileCompare cmp,
+            long volumeSplitSize)
         {
             var tmpFilePath = $"{new FileInfo(createpakPath).DirectoryName}\\Temp-{Randomstr(32)}";
             Directory.CreateDirectory(tmpFilePath);
@@ -344,7 +357,8 @@ namespace HDiffPatchCreator
             await OuterInvoke.Run(new OuterInvokeInfo
             {
                 ProcessPath = path7z,
-                CmdLine = $"a -tzip \"{createpakPath}\" \"{tmpFilePath}\\*\" -mmt",
+                CmdLine = $"a -tzip \"{createpakPath}\" \"{tmpFilePath}\\*\" -mmt "
+                    + (volumeSplitSize > 0 ? $"-v{volumeSplitSize}b" : ""),
                 StartingNotice = "Compressing output zip archive...",
                 AutoTerminateReason = "Output compressing failed. You may retry by yourself."
             }, 6);
